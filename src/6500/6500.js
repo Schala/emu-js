@@ -778,7 +778,7 @@ class MOS6500
 		this._y = 0;
 
 		// state
-		this._p = U;
+		this._p = Flag.U;
 	}
 
 	// --- internal helper functions ---
