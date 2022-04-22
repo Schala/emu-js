@@ -1,22 +1,22 @@
 "use strict"
 
-const emulator = require("../emulator.js");
+const emulator = require("../emulator");
 
 /** Disassembler address mode constants */
 const Mode =
 {
-	Abs,
-	AbsX,
-	AbsY,
-	Imm,
-	Imp,
-	Ind,
-	IndX,
-	IndY,
-	Rel,
-	ZPg,
-	ZPgX,
-	ZPgY
+	Abs: 0,
+	AbsX: 1,
+	AbsY: 2,
+	Imm: 3,
+	Imp: 4,
+	Ind: 5,
+	IndX: 6,
+	IndY: 7,
+	Rel: 8,
+	ZPg: 9,
+	ZPgX: 10,
+	ZPgY: 11
 }
 
 /** Disassembler mnemonics */
@@ -317,58 +317,63 @@ class Disassembly
 	/**
 	 * Disassemble a single instruction
 	 * @constructor
-	 * @param {emulator.RAM} ram - RAM buffer
+	 * @param {DataView} ram - RAM buffer
 	 * @param {number} offset - Offset into the buffer
 	*/
 	constructor(ram, offset)
 	{
-		this.offset = offset;
+		if (offset === undefined)
+			offset = 0;
+			
+		this.start = offset;
 		var op = ram.getUint8(offset++);
 		this.code = Mnemonics[op].op;
 
 		switch (Mnemonics[op].mode)
 		{
 			case Mode.Imm:
-				this.code += " #$" + ram.getUint8(offset++).toString(16).toUppercase().padStart(2);
+				this.code += " #$" + ram.getUint8(offset++).toString(16).toUpperCase();
 				break;
 			case Mode.ZPg:
-				this.code += " $" + ram.getUint8(offset++).toString(16).toUppercase().padStart(2);
+				this.code += " $" + ram.getUint8(offset++).toString(16).toUpperCase();
 				break;
 			case Mode.ZPgX:
-				this.code += " $" + ram.getUint8(offset++).toString(16).toUppercase().padStart(2) + ", x";
+				this.code += " $" + ram.getUint8(offset++).toString(16).toUpperCase() + ", x";
 				break;
 			case Mode.ZPgY:
-				this.code += " $" + ram.getUint8(offset++).toString(16).toUppercase().padStart(2) + ", y";
+				this.code += " $" + ram.getUint8(offset++).toString(16).toUpperCase() + ", y";
 				break;
 			case Mode.IndX:
-				this.code += " ($" + ram.getUint8(offset++).toString(16).toUppercase().padStart(2) + ", x)";
+				this.code += " ($" + ram.getUint8(offset++).toString(16).toUpperCase() + ", x)";
 				break;
 			case Mode.IndY:
-				this.code += " ($" + ram.getUint8(offset++).toString(16).toUppercase().padStart(2) + ", y)";
+				this.code += " ($" + ram.getUint8(offset++).toString(16).toUpperCase() + ", y)";
 				break;
 			case Mode.Abs:
-				this.code += " $" + ram.getUint16(offset, true).toString(16).toUppercase().padStart(4);
+				this.code += " $" + ram.getUint16(offset, true).toString(16).toUpperCase();
 				offset += 2;
 				break;
 			case Mode.AbsX:
-				this.code += " $" + ram.getUint16(offset, true).toString(16).toUppercase().padStart(4) + ", x";
+				this.code += " $" + ram.getUint16(offset, true).toString(16).toUpperCase() + ", x";
 				offset += 2;
 				break;
 			case Mode.AbsY:
-				this.code += " $" + ram.getUint16(offset, true).toString(16).toUppercase().padStart(4) + ", y";
+				this.code += " $" + ram.getUint16(offset, true).toString(16).toUpperCase() + ", y";
 				offset += 2;
 				break;
 			case Mode.Ind:
-				this.code += " ($" + ram.getUint16(offset, true).toString(16).toUppercase().padStart(4) + ')';
+				this.code += " ($" + ram.getUint16(offset, true).toString(16).toUpperCase() + ')';
 				offset += 2;
 				break;
 			case Mode.Rel:
 				var rel = ram.getInt8(offset);
-				this.code += " $" + rel.toString(16).toUppercase().padStart(2) + " [$" +
-					(offset + rel).toString(16).toUppercase().padStart(4) + ']';
+				this.code += " $" + rel.toString(16).toUpperCase() + " [$" +
+					(offset + rel).toString(16).toUpperCase() + ']';
 				offset++;
 			default: ; // implied takes no operands
 		}
+
+		this.end = offset;
 	}
 }
 
@@ -1534,3 +1539,6 @@ class MOS6500
 		return 0;
 	}
 }
+
+exports.Disassembly = Disassembly;
+exports.MOS6500 = MOS6500;

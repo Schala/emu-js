@@ -331,3 +331,7 @@ class Bus
 		throw new Error("There is no addressable memory at offset " + offset);
 	}
 }
+
+exports.hexdump = hexdump;
+exports.RAM = RAM;
+exports.Bus = Bus;
