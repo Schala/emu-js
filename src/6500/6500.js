@@ -320,11 +320,8 @@ class Disassembly
 	 * @param {DataView} ram - RAM buffer
 	 * @param {number} offset - Offset into the buffer
 	*/
-	constructor(ram, offset)
-	{
-		if (offset === undefined)
-			offset = 0;
-			
+	constructor(ram, offset = 0)
+	{		
 		this.start = offset;
 		var op = ram.getUint8(offset++);
 		this.code = Mnemonics[op].op;
@@ -714,13 +711,18 @@ class MOS6500
 	 * Initialises and connects the CPU to a bus
 	 * @constructor
 	 * @param {emulator.Bus} bus - The bus to connect to
+	 * @param {number} ramSize - How much RAM does the CPU own?
+	 * @param {number} ramOffset - RAM's addressable offset on the bus
 	*/
-	constructor(bus)
+	constructor(bus, ramSize, ramOffset = 0)
 	{
 		this._ops = new Opcodes(this);
-		this.bus = bus;
+		this._bus = bus;
 		this._stack = new DataView(new ArrayBuffer(256));
+		this._ram = new ArrayBuffer(ramSize);
 		this.rom = null;
+
+		bus.addRam(ramOffset, this._ram);
 		reset();
 	}
 
@@ -746,6 +748,96 @@ class MOS6500
 		this._cycles--;
 	}
 
+	/** Return the accumulator value */
+	get accumulator()
+	{
+		return this._a;
+	}
+
+	/** Return a reference to the bus */
+	get bus()
+	{
+		return this._bus;
+	}
+
+	/** Return the program counter */
+	get counter()
+	{
+		return this._pc;
+	}
+
+	/** Return the amount of cycles */
+	get cycles()
+	{
+		return this._cycles;
+	}
+
+	/** Returns the state's disable interrupts bit as a boolean */
+	get hasInterrupts()
+	{
+		return !this._checkState(Flag.I);
+	}
+
+	/** Returns the state's break bit as a boolean */
+	get isBreak()
+	{
+		return this_checkState(Flag.B);
+	}
+
+	/** Returns the state's carry bit as a boolean */
+	get isCarry()
+	{
+		return this_checkState(Flag.C);
+	}
+
+	/** Returns the state's decimal mode bit as a boolean */
+	get isDecimal()
+	{
+		return this_checkState(Flag.D);
+	}
+
+	/** Returns the state's negative bit as a boolean */
+	get isNegative()
+	{
+		return this_checkState(Flag.N);
+	}
+
+	/** Returns the state's overflow bit as a boolean */
+	get isOverflow()
+	{
+		return this_checkState(Flag.V);
+	}
+
+	/** Returns the state's undefined bit as a boolean */
+	get isUndefined()
+	{
+		return this_checkState(Flag.U);
+	}
+
+	/** Returns the state's zero bit as a boolean */
+	get isZero()
+	{
+		return this_checkState(Flag.Z);
+	}
+
+	/** Returns the last absolute address processed */
+	get lastAbsAddr()
+	{
+		return this._absAddr;
+	}
+
+	/** Returns the last opcode processed */
+	get lastOp()
+	{
+		return this._op;
+	}
+
+	/** Returns the last relative address offset processed */
+	get lastRelAddr()
+	{
+		return this._relAddr;
+	}
+
 	/** Resets the CPU state */
 	reset()
 	{
@@ -756,7 +848,7 @@ class MOS6500
 		this._absAddr = 0;
 
 		// program counter, initialised to the value of the reset vector
-		this._pc = this.bus.getUint16(65532);
+		this._pc = this._bus.getUint16(65532);
 
 		// last relative address
 		this._relAddr = 0;
@@ -779,6 +871,30 @@ class MOS6500
 
 		// state
 		this._p = Flag.U;
+	}
+
+	/** Returns a reference to the stack */
+	get stack()
+	{
+		return this._stack;
+	}
+
+	/** Returns the stack pointer */
+	get stackPtr()
+	{
+		return this._s;
+	}
+
+	/** Return the X value */
+	get x()
+	{
+		return this._x;
+	}
+
+	/** Return the Y value */
+	get y()
+	{
+		return this._y;
 	}
 
 	// --- internal helper functions ---
@@ -812,7 +928,7 @@ class MOS6500
 	}
 
 	/** Check's the status register for the specified flag being set */
-	_checkState(flag)
+	checkState(flag)
 	{
 		return (this._p & flag) != 0;
 	}
@@ -834,19 +950,19 @@ class MOS6500
 	/** Retrieve a byte from the last read address */
 	_getLastByte()
 	{
-		return this.bus.getUint8(this._absAddr);
+		return this._bus.getUint8(this._absAddr);
 	}
 
 	/** Retrieve a word from the last read address */
 	_getLastWord()
 	{
-		return this.bus.getUint16(this._absAddr);
+		return this._bus.getUint16(this._absAddr);
 	}
 
 	/** Retrieve a byte from ROM */
 	_getRomByte()
 	{
-		return this.bus.getUint8(this._pc++);
+		return this._bus.getUint8(this._pc++);
 	}
 
 	/** Retrieve a word from ROM */
@@ -914,13 +1030,13 @@ class MOS6500
 	/** Store a byte to the last read address */
 	_setLastByte(data)
 	{
-		this.bus.setUint8(this._absAddr, data);
+		this._bus.setUint8(this._absAddr, data);
 	}
 
 	/** Store a word to the last read address */
 	_setLastWord()
 	{
-		this.bus.setUint16(this._absAddr, data);
+		this._bus.setUint16(this._absAddr, data);
 	}
 
 	/** Sets the negative and zero states after checking a value
@@ -992,10 +1108,10 @@ class MOS6500
 
 		if ((ptr & 255) == 0)
 			// emulate page boundary bug
-			this._absAddr = this.bus.getUint16(ptr);
+			this._absAddr = this._bus.getUint16(ptr);
 		else
 			// normal behavior
-			this._absAddr = this.bus.getUint16(ptr + 1);
+			this._absAddr = this._bus.getUint16(ptr + 1);
 		
 		return 0;
 	}
@@ -1003,7 +1119,7 @@ class MOS6500
 	/** Indirect address with X offset */
 	_indX()
 	{
-		this._absAddr = this.bus.getUint16((this._getRomWord() + this._x) & 255);
+		this._absAddr = this._bus.getUint16((this._getRomWord() + this._x) & 255);
 		return 0;
 	}
 
@@ -1011,8 +1127,8 @@ class MOS6500
 	_indY()
 	{
 		var t = this._getRomWord();
-		var lo = this.bus.getUint8(t & 255);
-		var hi = this.bus.getUint8((t + 1) & 255);
+		var lo = this._bus.getUint8(t & 255);
+		var hi = this._bus.getUint8((t + 1) & 255);
 		this._absAddr = (hi << 8) | lo + this._y;
 
 		return this._absAddr == (hi << 8) ? 0 : 1;
@@ -1057,7 +1173,7 @@ class MOS6500
 	/** Add with carry */
 	_adc()
 	{
-		var tmp = this._a + this._fetchByte() + (this._checkState(Flag.C) ? 1 : 0);
+		var tmp = this._a + this._fetchByte() + (this.isCarry ? 1 : 0);
 		this._setCNZ(tmp);
 		this._setState(Flag.V, ~((this._a ^ this._cache) & (this._a ^ tmp) & 128));
 		this._a = tmp & 255;
@@ -1084,7 +1200,7 @@ class MOS6500
 	/** Branch if not carry */
 	_bcc()
 	{
-		if (!this._checkState(Flag.C))
+		if (!this.isCarry)
 			this._branch();
 		return 0;
 	}
@@ -1092,7 +1208,7 @@ class MOS6500
 	/** Branch if carry */
 	_bcs()
 	{
-		if (this._checkState(Flag.C))
+		if (this.isCarry)
 			this._branch();
 		return 0;
 	}
@@ -1100,7 +1216,7 @@ class MOS6500
 	/** Branch if zero */
 	_beq()
 	{
-		if (this._checkState(Flag.Z))
+		if (this.isZero)
 			this._branch();
 		return 0;
 	}
@@ -1117,7 +1233,7 @@ class MOS6500
 	/** Branch if negative */
 	_bmi()
 	{
-		if (this._checkState(Flag.N))
+		if (this.isNegative)
 			this._branch();
 		return 0;
 	}
@@ -1125,7 +1241,7 @@ class MOS6500
 	/** Branch if not zero */
 	_bne()
 	{
-		if (!this._checkState(Flag.Z))
+		if (!this.isZero)
 			this._branch();
 		return 0;
 	}
@@ -1133,7 +1249,7 @@ class MOS6500
 	/** Branch if positive */
 	_bpl()
 	{
-		if (!this._checkState(Flag.N))
+		if (!this.isNegative)
 			this._branch();
 		return 0;
 	}
@@ -1146,14 +1262,14 @@ class MOS6500
 		this._setState(Flag.B, true);
 		this._setStackByte(this._p);
 		this._setState(Flag.B, false);
-		this._pc = this.bus,getUint16(65534);
+		this._pc = this._bus,getUint16(65534);
 		return 0;
 	}
 
 	/** Branch if not overflow */
 	_bvc()
 	{
-		if (!this._checkState(Flag.V))
+		if (!this.isOverflow)
 			this._branch();
 		return 0;
 	}
@@ -1161,7 +1277,7 @@ class MOS6500
 	/** Branch if overflow */
 	_bvs()
 	{
-		if (this._checkState(Flag.V))
+		if (this.isOverflow)
 			this._branch();
 		return 0;
 	}
@@ -1281,7 +1397,7 @@ class MOS6500
 	/** Request interrupt */
 	_irq()
 	{
-		if (!this._checkState(Flag.I))
+		if (this.hasInterrupts)
 			this._interrupt(65534, 7);
 		return 0;
 	}
@@ -1403,7 +1519,7 @@ class MOS6500
 	/** Rotate left */
 	_rol()
 	{
-		var tmp = (this._fetchByte() << 1) | (this._checkState(Flag.C) ? 1 : 0);
+		var tmp = (this._fetchByte() << 1) | (this.isCarry ? 1 : 0);
 		this._setCNZ(tmp);
 		this._checkMode(tmp);
 		return 0;
@@ -1443,7 +1559,7 @@ class MOS6500
 	_sbc()
 	{
 		var value = this._fetchByte() ^ 255; // invert
-		var tmp = this._a + this._fetchByte() + (this._checkState(Flag.C) ? 1 : 0);
+		var tmp = this._a + this._fetchByte() + (this.isCarry ? 1 : 0);
 		this._setCNZ(tmp);
 		this._setState(Flag.V, (tmp ^ this._a) & ((tmp ^ value) & 128));
 		this._a = tmp & 255;
