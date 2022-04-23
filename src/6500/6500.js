@@ -368,7 +368,7 @@ class Disassembly
 			case Mode.Rel:
 				var rel = ram.getInt8(offset);
 				this.code += " $" + rel.toString(16).toUpperCase() + " [$" +
-					(offset + rel).toString(16).toUpperCase() + ']';
+					(offset + rel - 1).toString(16).toUpperCase().padStart(4, '0') + ']';
 				offset++;
 			default: ; // implied takes no operands
 		}
