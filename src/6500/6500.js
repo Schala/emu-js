@@ -719,10 +719,11 @@ class MOS6500
 		this._ops = new Opcodes(this);
 		this._bus = bus;
 		this._stack = new DataView(new ArrayBuffer(256));
-		this._ram = new ArrayBuffer(ramSize);
+		this._ram = new ArrayBuffer(ramSize - 256);
 		this.rom = null;
 
-		bus.addRam(ramOffset, this._ram);
+		bus.addRam(ramOffset, this._stack);
+		bus.addRam(ramOffset + 256, this._ram);
 		reset();
 	}
 
