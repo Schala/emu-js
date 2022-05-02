@@ -1,7 +1,79 @@
 "use strict"
 
-const emulator = require("../emulator");
-const mos6500 = require("./6500");
+import * as emulator from "../emulator";
+import * as mos6500 from "6500";
+
+/** GameGenie character map */
+const Char =
+{
+	'A': 0,
+	'P': 1,
+	'Z': 2,
+	'L': 3,
+	'G': 4,
+	'I': 5,
+	'T': 6,
+	'Y': 7,
+	'E': 8,
+	'O': 9,
+	'X': 10,
+	'U': 11,
+	'K': 12,
+	'S': 13,
+	'V': 14,
+	'N': 15
+}
+
+/** GameGenie comparison code record */
+class Compare
+{
+	/**
+	 * @constructor
+	 * @param {number} cmp - Comparison byte
+	 * @param {number} data - Byte to write
+	*/
+	constructor(cmp, data)
+	{
+		this.cmp = cmp;
+		this.data = data;
+	}
+}
+
+/** Game Genie device */
+export class GameGenie
+{
+	/**
+	 * @constructor
+	 * @param {Bus} bus - Bus instance
+	 * @param {ROM} rom - ROM instance
+	*/
+	constructor(bus, rom)
+	{
+		this._rom = rom;
+		this._intercepts = new Map();
+		this._compares = new Map();
+		this._enc = new TextEncoder();
+	}
+
+	/** Convert and add a cheat */
+	addCheat(cheat)
+	{
+		var code = [];
+
+		
+	}
+
+	/**
+	 * Add a comparison (8 digit) code
+	 * @param {number} addr - Address of the affected byte
+	 * @param {number} cmp - Comparison byte
+	 * @param {number} data - Byte to write
+	*/
+	addCompare(addr, cmp, data)
+	{
+		this._compares[addr] = new Compare(cmp, data);
+	}
+}
 
 const MapInfo =
 {
@@ -13,7 +85,7 @@ const MapInfo =
 }
 
 /** An NES program cart */
-class ROM
+export class ROM
 {
 	/**
 	 * Load a ROM from a filepath
@@ -92,7 +164,7 @@ const Control =
 }
 
 /** Picture processing unit */
-class PPU2C02
+export class PPU2C02
 {
 	/**
 	 * @constructor
@@ -135,7 +207,7 @@ class PPU2C02
 }
 
 /** NES system */
-class NES
+export class NES
 {
 	constructor()
 	{
@@ -179,6 +251,3 @@ class NES
 		return this._rom;
 	}
 }
-
-exports.ROM = ROM;
-exports.NES = NES;

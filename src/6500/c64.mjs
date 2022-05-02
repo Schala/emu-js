@@ -1,10 +1,10 @@
 "use strict"
 
-const emulator = require("../emulator");
-const mos6500 = require("./6500");
+import * as emulator from "../emulator";
+import * as mos6500 from "6500";
 
 /** Raw casette tape */
-class RawTape
+export class RawTape
 {
 	/**
 	 * @constructor
@@ -50,7 +50,7 @@ class TapeEntry
 }
 
 /** Casette tape */
-class Tape
+export class Tape
 {
 	constructor()
 	{
@@ -63,6 +63,6 @@ class Tape
 }
 
 /** Commodore 64 system */
-class C64
+export class C64
 {
 }

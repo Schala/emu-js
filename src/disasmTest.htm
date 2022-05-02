@@ -1,0 +1,50 @@
+<!DOCTYPE HTML>
+<html>
+	<title>6500 test</title>
+	<script type="module">
+		import * as mos6500 from "./6500/6500.mjs";
+
+		var btn = document.getElementById("execbtn");
+		btn.addEventListener("click", () =>
+		{
+			var code = document.getElementById("code");
+			var disasm = document.getElementById("disassembly");
+			var raw = [];
+			code.value.replaceAll('\n', ' ').split(' ').forEach(element => raw.push(parseInt(element, 16)));
+
+			var bytes = new DataView(new Uint8Array(raw).buffer);
+			var ptr = 0;
+			var disassembly = [];
+			var str="";
+
+			while (ptr < bytes.byteLength)
+			{
+				var rec = new mos6500.Disassembly(bytes, ptr);
+				ptr = rec.end;
+				disassembly.push(rec);
+			}
+
+			for (var d of disassembly)
+				disasm.value += d.start.toString(16).toUpperCase().padStart(4, '0') + ": " + d.code + '\n';
+		});
+	</script>
+	<body>
+		<table>
+			<tr>
+				<td colspan="3">
+					<textarea id="code" wrap="off" cols="120" rows="10"></textarea>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<button type="button" id="execbtn">Execute</button>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<textarea id="disassembly" wrap="physical" cols="120" rows="16" readonly/></textarea>
+				</td>
+			</tr>
+		</table>
+	</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE HTML>
+<html>
+	<title>6500 test</title>
+	<script type="module">
+		import * as emu from "./emulator.mjs";
+		import * as mos6500 from "./6500/6500.mjs";
+
+		var execbtn = document.getElementById("execbtn");
+		var loadbtn = document.getElementById("loadbtn");
+
+		var a = document.getElementById("a");
+		var x = document.getElementById("x");
+		var y = document.getElementById("y");
+		var s = document.getElementById("s");
+		var pc = document.getElementById("pc");
+		var abs = document.getElementById("abs");
+		var rel = document.getElementById("rel");
+		var p = document.getElementById("p");
+
+		var bus = new emu.Bus(65536);
+		var cpu = new mos6500.MOS6500(bus, 8192, 0);
+		cpu.addVectors();
+
+		loadbtn.addEventListener("click", () =>
+		{
+			var code = document.getElementById("code");
+			var hex = document.getElementById("ramhex");
+			var raw = [];
+			code.value.replaceAll('\n', ' ').split(' ').forEach(element => raw.push(parseInt(element, 16)));
+			var bytes = new Uint8Array(raw).buffer;
+
+			bus.addRam(64, bytes);
+			cpu.entry = 8192;
+			cpu.reset();
+		});
+
+		execbtn.addEventListener("click", () =>
+		{
+			cpu.clock();
+			a.value = "A: $" + cpu.accumulator.toString(16).toUpperCase().padStart(2, '0');
+			s.value = "S: $" + cpu.stackPtr.toString(16).toUpperCase().padStart(2, '0');
+			x.value = "X: $" + cpu.x.toString(16).toUpperCase().padStart(2, '0');
+			y.value = "Y: $" + cpu.y.toString(16).toUpperCase().padStart(2, '0');
+			pc.value = "PC: $" + cpu.counter.toString(16).toUpperCase().padStart(4, '0');
+			abs.value = "Last absolute address: $" + cpu.lastAbsAddr.toString(16).toUpperCase().padStart(4, '0');
+			rel.value = "Last relative address: $" + cpu.lastRelAddr.toString(16).toUpperCase().padStart(4, '0');
+
+			p.value = (cpu.isCarry ? 'C' : 'x') + (cpu.isZero ? 'Z' : 'x') + (cpu.hasInterrupts ? 'I' : 'x') + (cpu.isDecimal ? 'D' : 'x') + 
+				(cpu.isBreak ? 'B' : 'x') + (cpu.isUndefined ? 'U' : 'x') + (cpu.isOverflow ? 'V' : 'x') + (cpu.isNegative ? 'N' : 'x');
+		});
+	</script>
+	<body>
+		<table>
+			<tr>
+				<td colspan="3">
+					<textarea id="code" wrap="off" cols="120" rows="10"></textarea>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Offset: <input id="offset" size="4" value="0"></input>
+				</td>
+				<td>
+					<button type="button" id="execbtn">Clock</button>
+				</td>
+				<td>
+					<button type="button" id="loadbtn">Load</button>
+				</td>
+			</tr>
+			<tr>
+				<td><p id="abs">Last absolute address: $0000</p></td>
+				<td><p id="rel">Last relative address: $00</p></td>
+				<td><p id="p">xxxxxxxx</p></td>
+			</tr>
+			<tr>
+				<td><p id="a">A: 0</p></td>
+				<td><p id="x">X: 0</p></td>
+				<td><p id="y">Y: 0</p></td>
+			</tr>
+			<tr>
+				<td><p id="s">SP: 0</p></td>
+				<td><p id="pc">PC: $0000</p></td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<textarea id="ramhex" wrap="physical" cols="120" rows="16" readonly/></textarea>
+				</td>
+			</tr>
+		</table>
+	</body>
+</html>

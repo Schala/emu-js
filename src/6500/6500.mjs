@@ -1,6 +1,6 @@
 "use strict"
 
-const emulator = require("../emulator");
+import * as emulator from "../emulator.mjs";
 
 /** Disassembler address mode constants */
 const Mode =
@@ -312,7 +312,7 @@ const Mnemonics =
 ];
 
 /** Disassembled code */
-class Disassembly
+export class Disassembly
 {
 	/**
 	 * Disassemble a single instruction
@@ -363,10 +363,9 @@ class Disassembly
 				offset += 2;
 				break;
 			case Mode.Rel:
-				var rel = ram.getInt8(offset);
+				var rel = ram.getInt8(offset++);
 				this.code += " $" + rel.toString(16).toUpperCase() + " [$" +
-					(offset + rel - 1).toString(16).toUpperCase().padStart(4, '0') + ']';
-				offset++;
+					(offset + rel).toString(16).toUpperCase().padStart(4, '0') + ']';
 			default: ; // implied takes no operands
 		}
 
@@ -705,7 +704,7 @@ class Opcodes
 }
 
 /** The central processor unit of the MOS 6500 series */
-class MOS6500
+export class MOS6500
 {
 	/**
 	 * Initialises and connects the CPU to a bus
@@ -718,13 +717,60 @@ class MOS6500
 	{
 		this._ops = new Opcodes(this);
 		this._bus = bus;
-		this._stack = new DataView(new ArrayBuffer(256));
+		this._stack = new ArrayBuffer(256);
 		this._ram = new ArrayBuffer(ramSize - 256);
 		this.rom = null;
 
 		bus.addRam(ramOffset, this._stack);
 		bus.addRam(ramOffset + 256, this._ram);
-		reset();
+		
+		// stack pointer
+		this._s = 253;
+
+		// last absolute address
+		this._absAddr = 0;
+
+		this._pc = 0;
+
+		// last relative address
+		this._relAddr = 0;
+
+		// last opcode
+		this._op = 0;
+
+		// byte data cache
+		this._cache = 0;
+
+		// cycle count
+		this._cycles = 8;
+
+		// accumulator
+		this._a = 0;
+
+		// general purpose registers
+		this._x = 0;
+		this._y = 0;
+
+		// state
+		this._p = Flag.U;
+	}
+
+	/** Return the accumulator value */
+	get accumulator()
+	{
+		return this._a;
+	}
+
+	/** Adds RAM for the system vectors, should they be absent otherwise */
+	addVectors()
+	{
+		this.bus.addRam(65530, new ArrayBuffer(6));
+	}
+
+	/** Return a reference to the bus */
+	get bus()
+	{
+		return this._bus;
 	}
 
 	/** Execute one instruction cycle */
@@ -749,18 +795,6 @@ class MOS6500
 		this._cycles--;
 	}
 
-	/** Return the accumulator value */
-	get accumulator()
-	{
-		return this._a;
-	}
-
-	/** Return a reference to the bus */
-	get bus()
-	{
-		return this._bus;
-	}
-
 	/** Return the program counter */
 	get counter()
 	{
@@ -773,10 +807,34 @@ class MOS6500
 		return this._cycles;
 	}
 
+	/** Returns the value of the entry vector */
+	get entry()
+	{
+		this._bus.getUint16(65532);
+	}
+
+	/** Sets the entry vector's value */
+	set entry(value)
+	{
+		this._bus.setUint16(65532, value);
+	}
+
 	/** Returns the state's disable interrupts bit as a boolean */
 	get hasInterrupts()
 	{
 		return !this._checkState(Flag.I);
+	}
+
+	/** Returns the value of the interrupt request vector */
+	get irq()
+	{
+		this._bus.getUint16(65534);
+	}
+
+	/** Sets the interrupt request vector's value */
+	set irq(value)
+	{
+		this._bus.setUint16(65534, value);
 	}
 
 	/** Returns the state's break bit as a boolean */
@@ -839,6 +897,18 @@ class MOS6500
 		return this._relAddr;
 	}
 
+	/** Returns the value of the non-maskable interrupt vector */
+	get nmi()
+	{
+		this._bus.getUint16(65530);
+	}
+
+	/** Sets the non-maskable interrupt vector's value */
+	set nmi(value)
+	{
+		this._bus.setUint16(65530, value);
+	}
+
 	/** Resets the CPU state */
 	reset()
 	{
@@ -848,8 +918,8 @@ class MOS6500
 		// last absolute address
 		this._absAddr = 0;
 
-		// program counter, initialised to the value of the reset vector
-		this._pc = this._bus.getUint16(65532);
+		// program counter, initialised to the value of the entry vector
+		this._pc = this.entry;
 
 		// last relative address
 		this._relAddr = 0;
@@ -877,7 +947,7 @@ class MOS6500
 	/** Returns a reference to the stack */
 	get stack()
 	{
-		return this._stack;
+		return new DataView(this._stack);
 	}
 
 	/** Returns the stack pointer */
@@ -1656,6 +1726,3 @@ class MOS6500
 		return 0;
 	}
 }
-
-exports.Disassembly = Disassembly;
-exports.MOS6500 = MOS6500;
