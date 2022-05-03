@@ -710,19 +710,12 @@ export class MOS6500
 	 * Initialises and connects the CPU to a bus
 	 * @constructor
 	 * @param {emulator.Bus} bus - The bus to connect to
-	 * @param {number} ramSize - How much RAM does the CPU own?
-	 * @param {number} ramOffset - RAM's addressable offset on the bus
 	*/
-	constructor(bus, ramSize, ramOffset = 0)
+	constructor(bus)
 	{
 		this._ops = new Opcodes(this);
 		this._bus = bus;
-		this._stack = new ArrayBuffer(256);
-		this._ram = new ArrayBuffer(ramSize - 256);
 		this.rom = null;
-
-		bus.addRam(ramOffset, this._stack);
-		bus.addRam(ramOffset + 256, this._ram);
 		
 		// stack pointer
 		this._s = 253;
@@ -759,12 +752,6 @@ export class MOS6500
 	get accumulator()
 	{
 		return this._a;
-	}
-
-	/** Adds RAM for the system vectors, should they be absent otherwise */
-	addVectors()
-	{
-		this.bus.addRam(65530, new ArrayBuffer(6));
 	}
 
 	/** Return a reference to the bus */
@@ -810,7 +797,7 @@ export class MOS6500
 	/** Returns the value of the entry vector */
 	get entry()
 	{
-		this._bus.getUint16(65532);
+		return this._bus.getUint16(65532);
 	}
 
 	/** Sets the entry vector's value */
@@ -828,7 +815,7 @@ export class MOS6500
 	/** Returns the value of the interrupt request vector */
 	get irq()
 	{
-		this._bus.getUint16(65534);
+		return this._bus.getUint16(65534);
 	}
 
 	/** Sets the interrupt request vector's value */
@@ -840,43 +827,43 @@ export class MOS6500
 	/** Returns the state's break bit as a boolean */
 	get isBreak()
 	{
-		return this_checkState(Flag.B);
+		return this._checkState(Flag.B);
 	}
 
 	/** Returns the state's carry bit as a boolean */
 	get isCarry()
 	{
-		return this_checkState(Flag.C);
+		return this._checkState(Flag.C);
 	}
 
 	/** Returns the state's decimal mode bit as a boolean */
 	get isDecimal()
 	{
-		return this_checkState(Flag.D);
+		return this._checkState(Flag.D);
 	}
 
 	/** Returns the state's negative bit as a boolean */
 	get isNegative()
 	{
-		return this_checkState(Flag.N);
+		return this._checkState(Flag.N);
 	}
 
 	/** Returns the state's overflow bit as a boolean */
 	get isOverflow()
 	{
-		return this_checkState(Flag.V);
+		return this._checkState(Flag.V);
 	}
 
 	/** Returns the state's undefined bit as a boolean */
 	get isUndefined()
 	{
-		return this_checkState(Flag.U);
+		return this._checkState(Flag.U);
 	}
 
 	/** Returns the state's zero bit as a boolean */
 	get isZero()
 	{
-		return this_checkState(Flag.Z);
+		return this._checkState(Flag.Z);
 	}
 
 	/** Returns the last absolute address processed */
@@ -900,7 +887,7 @@ export class MOS6500
 	/** Returns the value of the non-maskable interrupt vector */
 	get nmi()
 	{
-		this._bus.getUint16(65530);
+		return this._bus.getUint16(65530);
 	}
 
 	/** Sets the non-maskable interrupt vector's value */
@@ -947,7 +934,7 @@ export class MOS6500
 	/** Returns a reference to the stack */
 	get stack()
 	{
-		return new DataView(this._stack);
+		return this._bus.ram.buffer.splice(0, 256);
 	}
 
 	/** Returns the stack pointer */
@@ -999,7 +986,7 @@ export class MOS6500
 	}
 
 	/** Check's the status register for the specified flag being set */
-	checkState(flag)
+	_checkState(flag)
 	{
 		return (this._p & flag) != 0;
 	}
@@ -1007,7 +994,7 @@ export class MOS6500
 	/** Fetch and caches a byte from the last read address */
 	_fetchByte()
 	{
-		if (this_ops.table[this._op].mode !== this._imp)
+		if (this._ops.table[this._op].mode !== this._imp)
 			this._cache = this._getLastByte();
 		return this._cache;
 	}
@@ -1045,7 +1032,7 @@ export class MOS6500
 	/** Retrieve a byte from the stack */
 	_getStackByte()
 	{
-		return this._stack.getUint8(this._s++);
+		return this._getUint8(this._s++ % 256);
 	}
 
 	/** Retrieve a word from the stack */

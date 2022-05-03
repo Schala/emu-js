@@ -16,27 +16,28 @@
 		var abs = document.getElementById("abs");
 		var rel = document.getElementById("rel");
 		var p = document.getElementById("p");
+		var hex = document.getElementById("ramhex");
 
 		var bus = new emu.Bus(65536);
-		var cpu = new mos6500.MOS6500(bus, 8192, 0);
-		cpu.addVectors();
+		var cpu = new mos6500.MOS6500(bus);
 
 		loadbtn.addEventListener("click", () =>
 		{
 			var code = document.getElementById("code");
-			var hex = document.getElementById("ramhex");
 			var raw = [];
 			code.value.replaceAll('\n', ' ').split(' ').forEach(element => raw.push(parseInt(element, 16)));
-			var bytes = new Uint8Array(raw).buffer;
+			bus.load(raw, 8192);
 
-			bus.addRam(64, bytes);
 			cpu.entry = 8192;
 			cpu.reset();
+			hex.value = emu.hexdump(bus.ram);
 		});
 
 		execbtn.addEventListener("click", () =>
 		{
 			cpu.clock();
+			while (cpu.cycles > 0)
+				cpu.clock();
 			a.value = "A: $" + cpu.accumulator.toString(16).toUpperCase().padStart(2, '0');
 			s.value = "S: $" + cpu.stackPtr.toString(16).toUpperCase().padStart(2, '0');
 			x.value = "X: $" + cpu.x.toString(16).toUpperCase().padStart(2, '0');
@@ -47,6 +48,8 @@
 
 			p.value = (cpu.isCarry ? 'C' : 'x') + (cpu.isZero ? 'Z' : 'x') + (cpu.hasInterrupts ? 'I' : 'x') + (cpu.isDecimal ? 'D' : 'x') + 
 				(cpu.isBreak ? 'B' : 'x') + (cpu.isUndefined ? 'U' : 'x') + (cpu.isOverflow ? 'V' : 'x') + (cpu.isNegative ? 'N' : 'x');
+			
+			hex.value = emu.hexdump(bus.ram);
 		});
 	</script>
 	<body>

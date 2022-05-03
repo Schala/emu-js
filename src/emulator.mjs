@@ -3,20 +3,20 @@
 /**
  * Dumps a hex view to console
  * @param {DataView} data - Data to be displayed
- * @param {number?} offset - Optional offset
+ * @param {number} offset - Optional offset
 */
 export function hexdump(data, offset = 0)
 {
+	var output = "";
 	for (var y = 0; y < data.byteLength >> 4; y++)
 	{
 		// offset
-		process.stdout.write(((y << 4) + offset).toString(16).toUpperCase().padStart(4, '0') + ": ");
+		output += ((y << 4) + offset).toString(16).toUpperCase().padStart(4, '0') + ": ";
 
 		// byte content
 		for (var x = 0; x < 16; x++)
-			process.stdout.write(data.getUint8((y << 4) + x).toString(16).toUpperCase()
-				.padStart(2, '0') + ' ');
-		process.stdout.write('\t');
+			output += data.getUint8((y << 4) + x).toString(16).toUpperCase().padStart(2, '0') + ' ';
+		output += '\t';
 
 		// ASCII
 		for (var x = 0; x < 16; x++)
@@ -28,39 +28,12 @@ export function hexdump(data, offset = 0)
 				b = 46; // '.'
 
 			var c = String.fromCharCode(b);
-			process.stdout.write(c);
+			output += c;
 		}
-		console.log('');
-	}
-}
-
-/** A bus's random access memory */
-export class RAM
-{
-	/**
-	 * Creates a new RAM association
-	 * @constructor
-	 * @param {number} offset - Offset address of the memory
-	 * @param {ArrayBuffer} data - Memory buffer
-	*/
-	constructor(bus, offset, data)
-	{
-		this.bus = bus;
-
-		if (offset < 0)
-			throw new Error("Offset must be greater than or equal to 0");
-		if (offset >= bus.maxOffset)
-			throw new Error("Offset exceeds bus's maximum allowable offset (" + bus.maxOffset + ')');
-		
-		this.offset = offset;
-		this.data = new DataView(data);
+		output += '\n';
 	}
 
-	/** Dumps a hex view to console */
-	hexdump()
-	{
-		hexdump(this.data, this.offset);
-	}
+	return output;
 }
 
 /** The bus is the main hub for all connected devices. */
@@ -73,19 +46,7 @@ export class Bus
 	*/
 	constructor(maxOffset)
 	{
-		this._ramMap = [];
-		this.devices = [];
-		this.maxOffset = maxOffset;
-	}
-
-	/**
-	 * Adds a RAM entry to the bus's RAM map
-	 * @param {number} offset - Offset in bus's RAM
-	 * @param {ArrayBuffer} data - RAM buffer
-	*/
-	addRam(offset, data)
-	{
-		this._ramMap.push(new RAM(this, offset, data));
+		this._ram = new DataView(new ArrayBuffer(maxOffset));
 	}
 
 	/**
@@ -96,14 +57,10 @@ export class Bus
 	{
 		if (offset < 0)
 			throw new Error("Offset must be greater than or equal to 0");
-		if (offset >= this.maxOffset)
-			throw new Error("Offset out of bus's memory range (" + this.maxOffset + ')');
+		if (offset >= this._ram.byteLength)
+			throw new Error("Offset out of bus's memory range (" + this._ram.byteLength + ')');
 
-		for (let ram of this._ramMap)
-			if (offset >= ram.offset && offset < (ram.offset + ram.data.byteLength))
-				return ram.data.getInt8(offset - ram.offset);
-		
-		throw new Error("There is no addressable memory at offset " + offset);
+		return this._ram.getInt8(offset);
 	}
 
 	/**
@@ -115,14 +72,10 @@ export class Bus
 	{
 		if (offset < 0)
 			throw new Error("Offset must be greater than or equal to 0");
-		if (offset >= this.maxOffset)
-			throw new Error("Offset out of bus's memory range (" + this.maxOffset + ')');
+		if (offset >= this._ram.byteLength)
+			throw new Error("Offset out of bus's memory range (" + this._ram.byteLength + ')');
 
-		for (let ram of this._ramMap)
-			if (offset >= ram.offset && offset < (ram.offset + ram.data.byteLength))
-				return ram.data.getInt16(offset - ram.offset, littleEndian);
-		
-		throw new Error("There is no addressable memory at offset " + offset);
+		return this._ram.getInt16(offset, littleEndian);
 	}
 
 	/**
@@ -134,14 +87,10 @@ export class Bus
 	{
 		if (offset < 0)
 			throw new Error("Offset must be greater than or equal to 0");
-		if (offset >= this.maxOffset)
-			throw new Error("Offset out of bus's memory range (" + this.maxOffset + ')');
+		if (offset >= this._ram.byteLength)
+			throw new Error("Offset out of bus's memory range (" + this._ram.byteLength + ')');
 
-		for (let ram of this._ramMap)
-			if (offset >= ram.offset && offset < (ram.offset + ram.data.byteLength))
-				return ram.data.getInt32(offset - ram.offset, littleEndian);
-		
-		throw new Error("There is no addressable memory at offset " + offset);
+		return this._ram.getInt32(offset, littleEndian);
 	}
 
 	/**
@@ -152,14 +101,10 @@ export class Bus
 	{
 		if (offset < 0)
 			throw new Error("Offset must be greater than or equal to 0");
-		if (offset >= this.maxOffset)
-			throw new Error("Offset out of bus's memory range (" + this.maxOffset + ')');
+		if (offset >= this._ram.byteLength)
+			throw new Error("Offset out of bus's memory range (" + this._ram.byteLength + ')');
 
-		for (let ram of this._ramMap)
-			if (offset >= ram.offset && offset < (ram.offset + ram.data.byteLength))
-				return ram.data.getUint8(offset - ram.offset);
-		
-		throw new Error("There is no addressable memory at offset " + offset);
+		return this._ram.getUint8(offset);
 	}
 
 	/**
@@ -171,14 +116,10 @@ export class Bus
 	{
 		if (offset < 0)
 			throw new Error("Offset must be greater than or equal to 0");
-		if (offset >= this.maxOffset)
-			throw new Error("Offset out of bus's memory range (" + this.maxOffset + ')');
+		if (offset >= this._ram.byteLength)
+			throw new Error("Offset out of bus's memory range (" + this._ram.byteLength + ')');
 
-		for (let ram of this._ramMap)
-			if (offset >= ram.offset && offset < (ram.offset + ram.data.byteLength))
-				return ram.data.getUint16(offset - ram.offset, littleEndian);
-		
-		throw new Error("There is no addressable memory at offset " + offset);
+		return this._ram.getUint16(offset, littleEndian);
 	}
 
 	/**
@@ -190,24 +131,23 @@ export class Bus
 	{
 		if (offset < 0)
 			throw new Error("Offset must be greater than or equal to 0");
-		if (offset >= this.maxOffset)
-			throw new Error("Offset out of bus's memory range (" + this.maxOffset + ')');
+		if (offset >= this._ram.byteLength)
+			throw new Error("Offset out of bus's memory range (" + this._ram.byteLength + ')');
 
-		for (let ram of this._ramMap)
-			if (offset >= ram.offset && offset < (ram.offset + ram.data.byteLength))
-				return ram.data.getUint32(offset - ram.offset, littleEndian);
-		
-		throw new Error("There is no addressable memory at offset " + offset);
+		return this._ram.getUint32(offset, littleEndian);
 	}
 
-	/**
-	 * Removes a RAM entry by reference
-	 * @param {ArrayBuffer} data - Data reference to find
-	*/
-	removeRam(data)
+	/** Loads a buffer into RAM */
+	load(buffer, offset = 0)
 	{
-		var i = this._ramMap.findIndex(elem => elem.buffer === data);
-		this._ramMap.splice(i, i);
+		for (let i = 0; i < buffer.length; i++)
+			this._ram.setUint8(i + offset, buffer[i]);
+	}
+
+	/** Retrns a reference to RAM */
+	get ram()
+	{
+		return this._ram;
 	}
 
 	/**
@@ -219,14 +159,10 @@ export class Bus
 	{
 		if (offset < 0)
 			throw new Error("Offset must be greater than or equal to 0");
-		if (offset >= this.maxOffset)
-			throw new Error("Offset out of bus's memory range (" + this.maxOffset + ')');
+		if (offset >= this._ram.byteLength)
+			throw new Error("Offset out of bus's memory range (" + this._ram.byteLength + ')');
 
-		for (let ram of this._ramMap)
-			if (offset >= ram.offset && offset < (ram.offset + ram.data.byteLength))
-				return ram.data.setInt8(offset - ram.offset, data);
-		
-		throw new Error("There is no addressable memory at offset " + offset);
+		this._ram.setInt8(offset, data);
 	}
 
 	/**
@@ -239,14 +175,10 @@ export class Bus
 	{
 		if (offset < 0)
 			throw new Error("Offset must be greater than or equal to 0");
-		if (offset >= this.maxOffset)
-			throw new Error("Offset out of bus's memory range (" + this.maxOffset + ')');
+		if (offset >= this._ram.byteLength)
+			throw new Error("Offset out of bus's memory range (" + this._ram.byteLength + ')');
 
-		for (let ram of this._ramMap)
-			if (offset >= ram.offset && offset < (ram.offset + ram.data.byteLength))
-				return ram.data.setInt16(offset - ram.offset, data, littleEndian);
-		
-		throw new Error("There is no addressable memory at offset " + offset);
+		this._ram.setInt16(offset, data, littleEndian);
 	}
 
 	/**
@@ -259,14 +191,10 @@ export class Bus
 	{
 		if (offset < 0)
 			throw new Error("Offset must be greater than or equal to 0");
-		if (offset >= this.maxOffset)
-			throw new Error("Offset out of bus's memory range (" + this.maxOffset + ')');
+		if (offset >= this._ram.byteLength)
+			throw new Error("Offset out of bus's memory range (" + this._ram.byteLength + ')');
 
-		for (let ram of this._ramMap)
-			if (offset >= ram.offset && offset < (ram.offset + ram.data.byteLength))
-				return ram.data.setInt32(offset - ram.offset, data, littleEndian);
-		
-		throw new Error("There is no addressable memory at offset " + offset);
+		this._ram.setInt32(offset, data, littleEndian);
 	}
 
 	/**
@@ -278,14 +206,10 @@ export class Bus
 	{
 		if (offset < 0)
 			throw new Error("Offset must be greater than or equal to 0");
-		if (offset >= this.maxOffset)
-			throw new Error("Offset out of bus's memory range (" + this.maxOffset + ')');
+		if (offset >= this._ram.byteLength)
+			throw new Error("Offset out of bus's memory range (" + this._ram.byteLength + ')');
 
-		for (let ram of this._ramMap)
-			if (offset >= ram.offset && offset < (ram.offset + ram.data.byteLength))
-				return ram.data.setUint8(offset - ram.offset, data);
-		
-		throw new Error("There is no addressable memory at offset " + offset);
+		this._ram.setUint8(offset, data);
 	}
 
 	/**
@@ -298,14 +222,10 @@ export class Bus
 	{
 		if (offset < 0)
 			throw new Error("Offset must be greater than or equal to 0");
-		if (offset >= this.maxOffset)
-			throw new Error("Offset out of bus's memory range (" + this.maxOffset + ')');
+		if (offset >= this._ram.byteLength)
+			throw new Error("Offset out of bus's memory range (" + this._ram.byteLength + ')');
 
-		for (let ram of this._ramMap)
-			if (offset >= ram.offset && offset < (ram.offset + ram.data.byteLength))
-				return ram.data.setUint16(offset - ram.offset, data, littleEndian);
-		
-		throw new Error("There is no addressable memory at offset " + offset);
+		this._ram.setUint16(offset, data, littleEndian);
 	}
 
 	/**
@@ -318,13 +238,9 @@ export class Bus
 	{
 		if (offset < 0)
 			throw new Error("Offset must be greater than or equal to 0");
-		if (offset >= this.maxOffset)
-			throw new Error("Offset out of bus's memory range (" + this.maxOffset + ')');
+		if (offset >= this._ram.byteLength)
+			throw new Error("Offset out of bus's memory range (" + this._ram.byteLength + ')');
 
-		for (let ram of this._ramMap)
-			if (offset >= ram.offset && offset < (ram.offset + ram.data.byteLength))
-				return ram.data.setUint32(offset - ram.offset, data, littleEndian);
-		
-		throw new Error("There is no addressable memory at offset " + offset);
+		this._ram.setUint32(offset, data, littleEndian);
 	}
 }
