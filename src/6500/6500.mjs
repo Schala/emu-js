@@ -413,292 +413,292 @@ class Opcodes
 		this.table =
 		[
 			// 0x
-			{ cycles: 7, mode: cpu._imp, op: cpu._brk },
-			{ cycles: 6, mode: cpu._indX, op: cpu._ora },
-			{ cycles: 0, mode: cpu._imp, op: cpu._nop },
-			{ cycles: 8, mode: cpu._indX, op: cpu._nop },
-			{ cycles: 2, mode: cpu._zpg, op: cpu._nop },
-			{ cycles: 3, mode: cpu._zpg, op: cpu._ora },
-			{ cycles: 5, mode: cpu._zpg, op: cpu._asl },
-			{ cycles: 5, mode: cpu._zpg, op: cpu._nop },
-			{ cycles: 3, mode: cpu._imp, op: cpu._php },
-			{ cycles: 2, mode: cpu._imm, op: cpu._ora },
-			{ cycles: 2, mode: cpu._imp, op: cpu._asl },
-			{ cycles: 2, mode: cpu._imm, op: cpu._nop },
-			{ cycles: 4, mode: cpu._abs, op: cpu._nop },
-			{ cycles: 4, mode: cpu._abs, op: cpu._ora },
-			{ cycles: 6, mode: cpu._abs, op: cpu._asl },
-			{ cycles: 6, mode: cpu._abs, op: cpu._nop },
+			{ cycles: 7, mode: cpu._imp.bind(cpu), op: cpu._brk.bind(cpu) },
+			{ cycles: 6, mode: cpu._indX.bind(cpu), op: cpu._ora.bind(cpu) },
+			{ cycles: 0, mode: cpu._imp.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 8, mode: cpu._indX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 2, mode: cpu._zpg.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 3, mode: cpu._zpg.bind(cpu), op: cpu._ora.bind(cpu) },
+			{ cycles: 5, mode: cpu._zpg.bind(cpu), op: cpu._asl.bind(cpu) },
+			{ cycles: 5, mode: cpu._zpg.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 3, mode: cpu._imp.bind(cpu), op: cpu._php.bind(cpu) },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._ora.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._asl.bind(cpu) },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._abs.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._abs.bind(cpu), op: cpu._ora.bind(cpu) },
+			{ cycles: 6, mode: cpu._abs.bind(cpu), op: cpu._asl.bind(cpu) },
+			{ cycles: 6, mode: cpu._abs.bind(cpu), op: cpu._nop.bind(cpu) },
 
 			// 1x
-			{ cycles: 2, mode: cpu._rel, op: cpu._bpl },
-			{ cycles: 5, mode: cpu._indY, op: cpu._ora },
-			{ cycles: 0, mode: cpu._imp, op: cpu._nop },
-			{ cycles: 8, mode: cpu._indY, op: cpu._nop },
-			{ cycles: 4, mode: cpu._zpgX, op: cpu._nop },
-			{ cycles: 4, mode: cpu._zpgX, op: cpu._ora },
-			{ cycles: 6, mode: cpu._zpgX, op: cpu._asl },
-			{ cycles: 6, mode: cpu._zpgX, op: cpu._nop },
-			{ cycles: 2, mode: cpu._imp, op: cpu._clc },
-			{ cycles: 4, mode: cpu._absY, op: cpu._ora },
-			{ cycles: 2, mode: cpu._imp, op: cpu._nop },
-			{ cycles: 7, mode: cpu._absY, op: cpu._nop },
-			{ cycles: 4, mode: cpu._absX, op: cpu._nop },
-			{ cycles: 4, mode: cpu._absX, op: cpu._ora },
-			{ cycles: 7, mode: cpu._absX, op: cpu._asl },
-			{ cycles: 7, mode: cpu._absX, op: cpu._nop },
+			{ cycles: 2, mode: cpu._rel.bind(cpu), op: cpu._bpl.bind(cpu) },
+			{ cycles: 5, mode: cpu._indY.bind(cpu), op: cpu._ora.bind(cpu) },
+			{ cycles: 0, mode: cpu._imp.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 8, mode: cpu._indY.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgX.bind(cpu), op: cpu._ora.bind(cpu) },
+			{ cycles: 6, mode: cpu._zpgX.bind(cpu), op: cpu._asl.bind(cpu) },
+			{ cycles: 6, mode: cpu._zpgX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._clc.bind(cpu) },
+			{ cycles: 4, mode: cpu._absY.bind(cpu), op: cpu._ora.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 7, mode: cpu._absY.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._absX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._absX.bind(cpu), op: cpu._ora.bind(cpu) },
+			{ cycles: 7, mode: cpu._absX.bind(cpu), op: cpu._asl.bind(cpu) },
+			{ cycles: 7, mode: cpu._absX.bind(cpu), op: cpu._nop.bind(cpu) },
 
 			// 2x
-			{ cycles: 6, mode: cpu._abs, op: cpu._jsr },
-			{ cycles: 6, mode: cpu._indX, op: cpu._and },
-			{ cycles: 0, mode: cpu._imp, op: cpu._nop },
-			{ cycles: 8, mode: cpu._indX, op: cpu._nop },
-			{ cycles: 3, mode: cpu._zpg, op: cpu._bit },
-			{ cycles: 3, mode: cpu._zpg, op: cpu._and },
-			{ cycles: 5, mode: cpu._zpg, op: cpu._rol },
-			{ cycles: 5, mode: cpu._zpg, op: cpu._nop },
-			{ cycles: 4, mode: cpu._imp, op: cpu._plp },
-			{ cycles: 2, mode: cpu._imm, op: cpu._and },
-			{ cycles: 2, mode: cpu._imp, op: cpu._rol },
-			{ cycles: 2, mode: cpu._imm, op: cpu._nop },
-			{ cycles: 4, mode: cpu._abs, op: cpu._bit },
-			{ cycles: 4, mode: cpu._abs, op: cpu._and },
-			{ cycles: 6, mode: cpu._abs, op: cpu._rol },
-			{ cycles: 6, mode: cpu._abs, op: cpu._nop },
+			{ cycles: 6, mode: cpu._abs.bind(cpu), op: cpu._jsr.bind(cpu) },
+			{ cycles: 6, mode: cpu._indX.bind(cpu), op: cpu._and.bind(cpu) },
+			{ cycles: 0, mode: cpu._imp.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 8, mode: cpu._indX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 3, mode: cpu._zpg.bind(cpu), op: cpu._bit.bind(cpu) },
+			{ cycles: 3, mode: cpu._zpg.bind(cpu), op: cpu._and.bind(cpu) },
+			{ cycles: 5, mode: cpu._zpg.bind(cpu), op: cpu._rol.bind(cpu) },
+			{ cycles: 5, mode: cpu._zpg.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._imp.bind(cpu), op: cpu._plp.bind(cpu) },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._and.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._rol.bind(cpu) },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._abs.bind(cpu), op: cpu._bit.bind(cpu) },
+			{ cycles: 4, mode: cpu._abs.bind(cpu), op: cpu._and.bind(cpu) },
+			{ cycles: 6, mode: cpu._abs.bind(cpu), op: cpu._rol.bind(cpu) },
+			{ cycles: 6, mode: cpu._abs.bind(cpu), op: cpu._nop.bind(cpu) },
 
 			// 3x
-			{ cycles: 2, mode: cpu._rel, op: cpu._bmi },
-			{ cycles: 5, mode: cpu._indY, op: cpu._and },
-			{ cycles: 0, mode: cpu._imp, op: cpu._nop },
-			{ cycles: 8, mode: cpu._indY, op: cpu._nop },
-			{ cycles: 4, mode: cpu._zpgX, op: cpu._nop },
-			{ cycles: 4, mode: cpu._zpgX, op: cpu._and },
-			{ cycles: 6, mode: cpu._zpgX, op: cpu._rol },
-			{ cycles: 6, mode: cpu._zpgX, op: cpu._nop },
-			{ cycles: 2, mode: cpu._imp, op: cpu._sec },
-			{ cycles: 4, mode: cpu._absY, op: cpu._and },
-			{ cycles: 2, mode: cpu._imp, op: cpu._nop },
-			{ cycles: 7, mode: cpu._absY, op: cpu._nop },
-			{ cycles: 4, mode: cpu._absX, op: cpu._nop },
-			{ cycles: 4, mode: cpu._absX, op: cpu._and },
-			{ cycles: 7, mode: cpu._absX, op: cpu._rol },
-			{ cycles: 7, mode: cpu._absX, op: cpu._nop },
+			{ cycles: 2, mode: cpu._rel.bind(cpu), op: cpu._bmi.bind(cpu) },
+			{ cycles: 5, mode: cpu._indY.bind(cpu), op: cpu._and.bind(cpu) },
+			{ cycles: 0, mode: cpu._imp.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 8, mode: cpu._indY.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgX.bind(cpu), op: cpu._and.bind(cpu) },
+			{ cycles: 6, mode: cpu._zpgX.bind(cpu), op: cpu._rol.bind(cpu) },
+			{ cycles: 6, mode: cpu._zpgX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._sec.bind(cpu) },
+			{ cycles: 4, mode: cpu._absY.bind(cpu), op: cpu._and.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 7, mode: cpu._absY.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._absX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._absX.bind(cpu), op: cpu._and.bind(cpu) },
+			{ cycles: 7, mode: cpu._absX.bind(cpu), op: cpu._rol.bind(cpu) },
+			{ cycles: 7, mode: cpu._absX.bind(cpu), op: cpu._nop.bind(cpu) },
 
 			// 4x
-			{ cycles: 6, mode: cpu._imp, op: cpu._rti },
-			{ cycles: 6, mode: cpu._indX, op: cpu._eor },
-			{ cycles: 0, mode: cpu._imp, op: cpu._nop },
-			{ cycles: 8, mode: cpu._indX, op: cpu._nop },
-			{ cycles: 3, mode: cpu._zpg, op: cpu._nop },
-			{ cycles: 3, mode: cpu._zpg, op: cpu._eor },
-			{ cycles: 5, mode: cpu._zpg, op: cpu._lsr },
-			{ cycles: 5, mode: cpu._zpg, op: cpu._nop },
-			{ cycles: 3, mode: cpu._imp, op: cpu._pha },
-			{ cycles: 2, mode: cpu._imm, op: cpu._eor },
-			{ cycles: 2, mode: cpu._imp, op: cpu._lsr },
-			{ cycles: 2, mode: cpu._abs, op: cpu._nop },
-			{ cycles: 3, mode: cpu._abs, op: cpu._jmp },
-			{ cycles: 4, mode: cpu._abs, op: cpu._eor },
-			{ cycles: 6, mode: cpu._abs, op: cpu._lsr },
-			{ cycles: 6, mode: cpu._abs, op: cpu._nop },
+			{ cycles: 6, mode: cpu._imp.bind(cpu), op: cpu._rti.bind(cpu) },
+			{ cycles: 6, mode: cpu._indX.bind(cpu), op: cpu._eor.bind(cpu) },
+			{ cycles: 0, mode: cpu._imp.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 8, mode: cpu._indX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 3, mode: cpu._zpg.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 3, mode: cpu._zpg.bind(cpu), op: cpu._eor.bind(cpu) },
+			{ cycles: 5, mode: cpu._zpg.bind(cpu), op: cpu._lsr.bind(cpu) },
+			{ cycles: 5, mode: cpu._zpg.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 3, mode: cpu._imp.bind(cpu), op: cpu._pha.bind(cpu) },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._eor.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._lsr.bind(cpu) },
+			{ cycles: 2, mode: cpu._abs.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 3, mode: cpu._abs.bind(cpu), op: cpu._jmp.bind(cpu) },
+			{ cycles: 4, mode: cpu._abs.bind(cpu), op: cpu._eor.bind(cpu) },
+			{ cycles: 6, mode: cpu._abs.bind(cpu), op: cpu._lsr.bind(cpu) },
+			{ cycles: 6, mode: cpu._abs.bind(cpu), op: cpu._nop.bind(cpu) },
 
 			// 5x
-			{ cycles: 2, mode: cpu._rel, op: cpu._bvc },
-			{ cycles: 5, mode: cpu._indY, op: cpu._eor },
-			{ cycles: 0, mode: cpu._imp, op: cpu._nop },
-			{ cycles: 8, mode: cpu._indY, op: cpu._nop },
-			{ cycles: 4, mode: cpu._zpgX, op: cpu._nop },
-			{ cycles: 4, mode: cpu._zpgX, op: cpu._eor },
-			{ cycles: 6, mode: cpu._zpgX, op: cpu._lsr },
-			{ cycles: 6, mode: cpu._zpgX, op: cpu._nop },
-			{ cycles: 2, mode: cpu._imp, op: cpu._cli },
-			{ cycles: 4, mode: cpu._absY, op: cpu._eor },
-			{ cycles: 2, mode: cpu._imp, op: cpu._nop },
-			{ cycles: 7, mode: cpu._absY, op: cpu._nop },
-			{ cycles: 4, mode: cpu._absX, op: cpu._nop },
-			{ cycles: 4, mode: cpu._absX, op: cpu._eor },
-			{ cycles: 7, mode: cpu._absX, op: cpu._lsr },
-			{ cycles: 7, mode: cpu._absX, op: cpu._nop },
+			{ cycles: 2, mode: cpu._rel.bind(cpu), op: cpu._bvc.bind(cpu) },
+			{ cycles: 5, mode: cpu._indY.bind(cpu), op: cpu._eor.bind(cpu) },
+			{ cycles: 0, mode: cpu._imp.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 8, mode: cpu._indY.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgX.bind(cpu), op: cpu._eor.bind(cpu) },
+			{ cycles: 6, mode: cpu._zpgX.bind(cpu), op: cpu._lsr.bind(cpu) },
+			{ cycles: 6, mode: cpu._zpgX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._cli.bind(cpu) },
+			{ cycles: 4, mode: cpu._absY.bind(cpu), op: cpu._eor.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 7, mode: cpu._absY.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._absX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._absX.bind(cpu), op: cpu._eor.bind(cpu) },
+			{ cycles: 7, mode: cpu._absX.bind(cpu), op: cpu._lsr.bind(cpu) },
+			{ cycles: 7, mode: cpu._absX.bind(cpu), op: cpu._nop.bind(cpu) },
 
 			// 6x
-			{ cycles: 6, mode: cpu._imp, op: cpu._rts },
-			{ cycles: 6, mode: cpu._indX, op: cpu._adc },
-			{ cycles: 0, mode: cpu._imp, op: cpu._nop },
-			{ cycles: 8, mode: cpu._indX, op: cpu._nop },
-			{ cycles: 3, mode: cpu._zpg, op: cpu._nop },
-			{ cycles: 3, mode: cpu._zpg, op: cpu._adc },
-			{ cycles: 5, mode: cpu._zpg, op: cpu._ror },
-			{ cycles: 5, mode: cpu._zpg, op: cpu._nop },
-			{ cycles: 4, mode: cpu._imp, op: cpu._pla },
-			{ cycles: 2, mode: cpu._imm, op: cpu._adc },
-			{ cycles: 2, mode: cpu._imp, op: cpu._ror },
-			{ cycles: 2, mode: cpu._imm, op: cpu._nop },
-			{ cycles: 5, mode: cpu._ind, op: cpu._jmp },
-			{ cycles: 4, mode: cpu._abs, op: cpu._adc },
-			{ cycles: 6, mode: cpu._abs, op: cpu._ror },
-			{ cycles: 6, mode: cpu._abs, op: cpu._nop },
+			{ cycles: 6, mode: cpu._imp.bind(cpu), op: cpu._rts.bind(cpu) },
+			{ cycles: 6, mode: cpu._indX.bind(cpu), op: cpu._adc.bind(cpu) },
+			{ cycles: 0, mode: cpu._imp.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 8, mode: cpu._indX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 3, mode: cpu._zpg.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 3, mode: cpu._zpg.bind(cpu), op: cpu._adc.bind(cpu) },
+			{ cycles: 5, mode: cpu._zpg.bind(cpu), op: cpu._ror.bind(cpu) },
+			{ cycles: 5, mode: cpu._zpg.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._imp.bind(cpu), op: cpu._pla.bind(cpu) },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._adc.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._ror.bind(cpu) },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 5, mode: cpu._ind.bind(cpu), op: cpu._jmp.bind(cpu) },
+			{ cycles: 4, mode: cpu._abs.bind(cpu), op: cpu._adc.bind(cpu) },
+			{ cycles: 6, mode: cpu._abs.bind(cpu), op: cpu._ror.bind(cpu) },
+			{ cycles: 6, mode: cpu._abs.bind(cpu), op: cpu._nop.bind(cpu) },
 
 			// 7x
-			{ cycles: 2, mode: cpu._rel, op: cpu._bvs },
-			{ cycles: 5, mode: cpu._indY, op: cpu._adc },
-			{ cycles: 0, mode: cpu._imp, op: cpu._nop },
-			{ cycles: 8, mode: cpu._indY, op: cpu._nop },
-			{ cycles: 4, mode: cpu._zpgX, op: cpu._nop },
-			{ cycles: 4, mode: cpu._zpgX, op: cpu._adc },
-			{ cycles: 6, mode: cpu._zpgX, op: cpu._ror },
-			{ cycles: 6, mode: cpu._zpgX, op: cpu._nop },
-			{ cycles: 2, mode: cpu._imp, op: cpu._sei },
-			{ cycles: 4, mode: cpu._absY, op: cpu._adc },
-			{ cycles: 2, mode: cpu._imp, op: cpu._nop },
-			{ cycles: 7, mode: cpu._absY, op: cpu._nop },
-			{ cycles: 4, mode: cpu._absX, op: cpu._nop },
-			{ cycles: 4, mode: cpu._absX, op: cpu._adc },
-			{ cycles: 7, mode: cpu._absX, op: cpu._ror },
-			{ cycles: 7, mode: cpu._absX, op: cpu._nop },
+			{ cycles: 2, mode: cpu._rel.bind(cpu), op: cpu._bvs.bind(cpu) },
+			{ cycles: 5, mode: cpu._indY.bind(cpu), op: cpu._adc.bind(cpu) },
+			{ cycles: 0, mode: cpu._imp.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 8, mode: cpu._indY.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgX.bind(cpu), op: cpu._adc.bind(cpu) },
+			{ cycles: 6, mode: cpu._zpgX.bind(cpu), op: cpu._ror.bind(cpu) },
+			{ cycles: 6, mode: cpu._zpgX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._sei.bind(cpu) },
+			{ cycles: 4, mode: cpu._absY.bind(cpu), op: cpu._adc.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 7, mode: cpu._absY.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._absX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._absX.bind(cpu), op: cpu._adc.bind(cpu) },
+			{ cycles: 7, mode: cpu._absX.bind(cpu), op: cpu._ror.bind(cpu) },
+			{ cycles: 7, mode: cpu._absX.bind(cpu), op: cpu._nop.bind(cpu) },
 
 			// 8x
-			{ cycles: 2, mode: cpu._imm, op: cpu._nop },
-			{ cycles: 6, mode: cpu._indX, op: cpu._sta },
-			{ cycles: 2, mode: cpu._imm, op: cpu._nop },
-			{ cycles: 6, mode: cpu._indX, op: cpu._nop },
-			{ cycles: 3, mode: cpu._zpg, op: cpu._sty },
-			{ cycles: 3, mode: cpu._zpg, op: cpu._sta },
-			{ cycles: 3, mode: cpu._zpg, op: cpu._stx },
-			{ cycles: 3, mode: cpu._zpg, op: cpu._nop },
-			{ cycles: 2, mode: cpu._imp, op: cpu._dey },
-			{ cycles: 2, mode: cpu._imm, op: cpu._nop },
-			{ cycles: 2, mode: cpu._imp, op: cpu._txa },
-			{ cycles: 2, mode: cpu._imm, op: cpu._nop },
-			{ cycles: 4, mode: cpu._abs, op: cpu._sty },
-			{ cycles: 4, mode: cpu._abs, op: cpu._sta },
-			{ cycles: 4, mode: cpu._abs, op: cpu._stx },
-			{ cycles: 4, mode: cpu._abs, op: cpu._nop },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 6, mode: cpu._indX.bind(cpu), op: cpu._sta.bind(cpu) },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 6, mode: cpu._indX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 3, mode: cpu._zpg.bind(cpu), op: cpu._sty.bind(cpu) },
+			{ cycles: 3, mode: cpu._zpg.bind(cpu), op: cpu._sta.bind(cpu) },
+			{ cycles: 3, mode: cpu._zpg.bind(cpu), op: cpu._stx.bind(cpu) },
+			{ cycles: 3, mode: cpu._zpg.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._dey.bind(cpu) },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._txa.bind(cpu) },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._abs.bind(cpu), op: cpu._sty.bind(cpu) },
+			{ cycles: 4, mode: cpu._abs.bind(cpu), op: cpu._sta.bind(cpu) },
+			{ cycles: 4, mode: cpu._abs.bind(cpu), op: cpu._stx.bind(cpu) },
+			{ cycles: 4, mode: cpu._abs.bind(cpu), op: cpu._nop.bind(cpu) },
 
 			// 9x
-			{ cycles: 2, mode: cpu._rel, op: cpu._bcc },
-			{ cycles: 6, mode: cpu._indY, op: cpu._sta },
-			{ cycles: 0, mode: cpu._imp, op: cpu._nop },
-			{ cycles: 6, mode: cpu._indY, op: cpu._nop },
-			{ cycles: 4, mode: cpu._zpgX, op: cpu._sty },
-			{ cycles: 4, mode: cpu._zpgX, op: cpu._sta },
-			{ cycles: 4, mode: cpu._zpgY, op: cpu._stx },
-			{ cycles: 4, mode: cpu._zpgY, op: cpu._nop },
-			{ cycles: 2, mode: cpu._imp, op: cpu._tya },
-			{ cycles: 5, mode: cpu._absY, op: cpu._sta },
-			{ cycles: 2, mode: cpu._imp, op: cpu._txs },
-			{ cycles: 5, mode: cpu._absY, op: cpu._nop },
-			{ cycles: 5, mode: cpu._absX, op: cpu._nop },
-			{ cycles: 5, mode: cpu._absX, op: cpu._sta },
-			{ cycles: 6, mode: cpu._absY, op: cpu._nop },
-			{ cycles: 5, mode: cpu._absY, op: cpu._nop },
+			{ cycles: 2, mode: cpu._rel.bind(cpu), op: cpu._bcc.bind(cpu) },
+			{ cycles: 6, mode: cpu._indY.bind(cpu), op: cpu._sta.bind(cpu) },
+			{ cycles: 0, mode: cpu._imp.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 6, mode: cpu._indY.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgX.bind(cpu), op: cpu._sty.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgX.bind(cpu), op: cpu._sta.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgY.bind(cpu), op: cpu._stx.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgY.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._tya.bind(cpu) },
+			{ cycles: 5, mode: cpu._absY.bind(cpu), op: cpu._sta.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._txs.bind(cpu) },
+			{ cycles: 5, mode: cpu._absY.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 5, mode: cpu._absX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 5, mode: cpu._absX.bind(cpu), op: cpu._sta.bind(cpu) },
+			{ cycles: 6, mode: cpu._absY.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 5, mode: cpu._absY.bind(cpu), op: cpu._nop.bind(cpu) },
 
 			// Ax
-			{ cycles: 2, mode: cpu._imm, op: cpu._ldy },
-			{ cycles: 6, mode: cpu._indX, op: cpu._lda },
-			{ cycles: 2, mode: cpu._imm, op: cpu._ldx },
-			{ cycles: 6, mode: cpu._indX, op: cpu._nop },
-			{ cycles: 3, mode: cpu._zpg, op: cpu._ldy },
-			{ cycles: 3, mode: cpu._zpg, op: cpu._lda },
-			{ cycles: 3, mode: cpu._zpg, op: cpu._ldx },
-			{ cycles: 3, mode: cpu._zpg, op: cpu._nop },
-			{ cycles: 2, mode: cpu._imp, op: cpu._tay },
-			{ cycles: 2, mode: cpu._imm, op: cpu._lda },
-			{ cycles: 2, mode: cpu._imp, op: cpu._tax },
-			{ cycles: 2, mode: cpu._imm, op: cpu._nop },
-			{ cycles: 4, mode: cpu._abs, op: cpu._ldy },
-			{ cycles: 4, mode: cpu._abs, op: cpu._lda },
-			{ cycles: 4, mode: cpu._abs, op: cpu._ldx },
-			{ cycles: 4, mode: cpu._abs, op: cpu._nop },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._ldy.bind(cpu) },
+			{ cycles: 6, mode: cpu._indX.bind(cpu), op: cpu._lda.bind(cpu) },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._ldx.bind(cpu) },
+			{ cycles: 6, mode: cpu._indX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 3, mode: cpu._zpg.bind(cpu), op: cpu._ldy.bind(cpu) },
+			{ cycles: 3, mode: cpu._zpg.bind(cpu), op: cpu._lda.bind(cpu) },
+			{ cycles: 3, mode: cpu._zpg.bind(cpu), op: cpu._ldx.bind(cpu) },
+			{ cycles: 3, mode: cpu._zpg.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._tay.bind(cpu) },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._lda.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._tax.bind(cpu) },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._abs.bind(cpu), op: cpu._ldy.bind(cpu) },
+			{ cycles: 4, mode: cpu._abs.bind(cpu), op: cpu._lda.bind(cpu) },
+			{ cycles: 4, mode: cpu._abs.bind(cpu), op: cpu._ldx.bind(cpu) },
+			{ cycles: 4, mode: cpu._abs.bind(cpu), op: cpu._nop.bind(cpu) },
 
 			// Bx
-			{ cycles: 2, mode: cpu._rel, op: cpu._bcs },
-			{ cycles: 5, mode: cpu._indY, op: cpu._lda },
-			{ cycles: 0, mode: cpu._imp, op: cpu._nop },
-			{ cycles: 5, mode: cpu._indY, op: cpu._nop },
-			{ cycles: 4, mode: cpu._zpgX, op: cpu._ldy },
-			{ cycles: 4, mode: cpu._zpgX, op: cpu._lda },
-			{ cycles: 4, mode: cpu._zpgY, op: cpu._ldx },
-			{ cycles: 4, mode: cpu._zpgY, op: cpu._nop },
-			{ cycles: 2, mode: cpu._imp, op: cpu._clv },
-			{ cycles: 4, mode: cpu._absY, op: cpu._lda },
-			{ cycles: 2, mode: cpu._imp, op: cpu._tsx },
-			{ cycles: 4, mode: cpu._absY, op: cpu._nop },
-			{ cycles: 4, mode: cpu._absX, op: cpu._ldy },
-			{ cycles: 4, mode: cpu._absX, op: cpu._lda },
-			{ cycles: 4, mode: cpu._absY, op: cpu._ldx },
-			{ cycles: 4, mode: cpu._absY, op: cpu._nop },
+			{ cycles: 2, mode: cpu._rel.bind(cpu), op: cpu._bcs.bind(cpu) },
+			{ cycles: 5, mode: cpu._indY.bind(cpu), op: cpu._lda.bind(cpu) },
+			{ cycles: 0, mode: cpu._imp.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 5, mode: cpu._indY.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgX.bind(cpu), op: cpu._ldy.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgX.bind(cpu), op: cpu._lda.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgY.bind(cpu), op: cpu._ldx.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgY.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._clv.bind(cpu) },
+			{ cycles: 4, mode: cpu._absY.bind(cpu), op: cpu._lda.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._tsx.bind(cpu) },
+			{ cycles: 4, mode: cpu._absY.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._absX.bind(cpu), op: cpu._ldy.bind(cpu) },
+			{ cycles: 4, mode: cpu._absX.bind(cpu), op: cpu._lda.bind(cpu) },
+			{ cycles: 4, mode: cpu._absY.bind(cpu), op: cpu._ldx.bind(cpu) },
+			{ cycles: 4, mode: cpu._absY.bind(cpu), op: cpu._nop.bind(cpu) },
 
 			// Cx
-			{ cycles: 2, mode: cpu._imm, op: cpu._cpy },
-			{ cycles: 6, mode: cpu._indX, op: cpu._cmp },
-			{ cycles: 2, mode: cpu._imm, op: cpu._nop },
-			{ cycles: 8, mode: cpu._indX, op: cpu._nop },
-			{ cycles: 3, mode: cpu._zpg, op: cpu._cpy },
-			{ cycles: 3, mode: cpu._zpg, op: cpu._cmp },
-			{ cycles: 5, mode: cpu._zpg, op: cpu._dec },
-			{ cycles: 5, mode: cpu._zpg, op: cpu._nop },
-			{ cycles: 2, mode: cpu._imp, op: cpu._iny },
-			{ cycles: 2, mode: cpu._imm, op: cpu._cmp },
-			{ cycles: 2, mode: cpu._imp, op: cpu._dex },
-			{ cycles: 2, mode: cpu._imm, op: cpu._nop },
-			{ cycles: 4, mode: cpu._abs, op: cpu._cpy },
-			{ cycles: 4, mode: cpu._abs, op: cpu._cmp },
-			{ cycles: 6, mode: cpu._abs, op: cpu._dec },
-			{ cycles: 6, mode: cpu._abs, op: cpu._nop },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._cpy.bind(cpu) },
+			{ cycles: 6, mode: cpu._indX.bind(cpu), op: cpu._cmp.bind(cpu) },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 8, mode: cpu._indX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 3, mode: cpu._zpg.bind(cpu), op: cpu._cpy.bind(cpu) },
+			{ cycles: 3, mode: cpu._zpg.bind(cpu), op: cpu._cmp.bind(cpu) },
+			{ cycles: 5, mode: cpu._zpg.bind(cpu), op: cpu._dec.bind(cpu) },
+			{ cycles: 5, mode: cpu._zpg.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._iny.bind(cpu) },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._cmp.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._dex.bind(cpu) },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._abs.bind(cpu), op: cpu._cpy.bind(cpu) },
+			{ cycles: 4, mode: cpu._abs.bind(cpu), op: cpu._cmp.bind(cpu) },
+			{ cycles: 6, mode: cpu._abs.bind(cpu), op: cpu._dec.bind(cpu) },
+			{ cycles: 6, mode: cpu._abs.bind(cpu), op: cpu._nop.bind(cpu) },
 
 			// Dx
-			{ cycles: 2, mode: cpu._rel, op: cpu._bne },
-			{ cycles: 5, mode: cpu._indY, op: cpu._cmp },
-			{ cycles: 0, mode: cpu._imp, op: cpu._nop },
-			{ cycles: 8, mode: cpu._indY, op: cpu._nop },
-			{ cycles: 4, mode: cpu._zpgX, op: cpu._nop },
-			{ cycles: 4, mode: cpu._zpgX, op: cpu._cmp },
-			{ cycles: 6, mode: cpu._zpgX, op: cpu._dec },
-			{ cycles: 6, mode: cpu._zpgX, op: cpu._nop },
-			{ cycles: 2, mode: cpu._imp, op: cpu._cld },
-			{ cycles: 4, mode: cpu._absY, op: cpu._cmp },
-			{ cycles: 2, mode: cpu._imp, op: cpu._nop },
-			{ cycles: 7, mode: cpu._absY, op: cpu._nop },
-			{ cycles: 4, mode: cpu._absX, op: cpu._nop },
-			{ cycles: 4, mode: cpu._absX, op: cpu._cmp },
-			{ cycles: 7, mode: cpu._absX, op: cpu._dec },
-			{ cycles: 7, mode: cpu._absX, op: cpu._nop },
+			{ cycles: 2, mode: cpu._rel.bind(cpu), op: cpu._bne.bind(cpu) },
+			{ cycles: 5, mode: cpu._indY.bind(cpu), op: cpu._cmp.bind(cpu) },
+			{ cycles: 0, mode: cpu._imp.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 8, mode: cpu._indY.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgX.bind(cpu), op: cpu._cmp.bind(cpu) },
+			{ cycles: 6, mode: cpu._zpgX.bind(cpu), op: cpu._dec.bind(cpu) },
+			{ cycles: 6, mode: cpu._zpgX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._cld.bind(cpu) },
+			{ cycles: 4, mode: cpu._absY.bind(cpu), op: cpu._cmp.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 7, mode: cpu._absY.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._absX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._absX.bind(cpu), op: cpu._cmp.bind(cpu) },
+			{ cycles: 7, mode: cpu._absX.bind(cpu), op: cpu._dec.bind(cpu) },
+			{ cycles: 7, mode: cpu._absX.bind(cpu), op: cpu._nop.bind(cpu) },
 
 			// Ex
-			{ cycles: 2, mode: cpu._imm, op: cpu._cpx },
-			{ cycles: 6, mode: cpu._indX, op: cpu._sbc },
-			{ cycles: 2, mode: cpu._imm, op: cpu._nop },
-			{ cycles: 8, mode: cpu._indX, op: cpu._nop },
-			{ cycles: 3, mode: cpu._zpg, op: cpu._cpx },
-			{ cycles: 3, mode: cpu._zpg, op: cpu._sbc },
-			{ cycles: 5, mode: cpu._zpg, op: cpu._inc },
-			{ cycles: 5, mode: cpu._zpg, op: cpu._nop },
-			{ cycles: 2, mode: cpu._imp, op: cpu._inx },
-			{ cycles: 2, mode: cpu._imm, op: cpu._sbc },
-			{ cycles: 2, mode: cpu._imp, op: cpu._nop },
-			{ cycles: 2, mode: cpu._imm, op: cpu._nop },
-			{ cycles: 4, mode: cpu._abs, op: cpu._cpx },
-			{ cycles: 4, mode: cpu._abs, op: cpu._sbc },
-			{ cycles: 6, mode: cpu._abs, op: cpu._inc },
-			{ cycles: 6, mode: cpu._abs, op: cpu._nop },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._cpx.bind(cpu) },
+			{ cycles: 6, mode: cpu._indX.bind(cpu), op: cpu._sbc.bind(cpu) },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 8, mode: cpu._indX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 3, mode: cpu._zpg.bind(cpu), op: cpu._cpx.bind(cpu) },
+			{ cycles: 3, mode: cpu._zpg.bind(cpu), op: cpu._sbc.bind(cpu) },
+			{ cycles: 5, mode: cpu._zpg.bind(cpu), op: cpu._inc.bind(cpu) },
+			{ cycles: 5, mode: cpu._zpg.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._inx.bind(cpu) },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._sbc.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 2, mode: cpu._imm.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._abs.bind(cpu), op: cpu._cpx.bind(cpu) },
+			{ cycles: 4, mode: cpu._abs.bind(cpu), op: cpu._sbc.bind(cpu) },
+			{ cycles: 6, mode: cpu._abs.bind(cpu), op: cpu._inc.bind(cpu) },
+			{ cycles: 6, mode: cpu._abs.bind(cpu), op: cpu._nop.bind(cpu) },
 
 			// Fx
-			{ cycles: 2, mode: cpu._rel, op: cpu._beq },
-			{ cycles: 5, mode: cpu._indY, op: cpu._sbc },
-			{ cycles: 0, mode: cpu._imp, op: cpu._nop },
-			{ cycles: 4, mode: cpu._indY, op: cpu._nop },
-			{ cycles: 4, mode: cpu._zpgX, op: cpu._nop },
-			{ cycles: 4, mode: cpu._zpgX, op: cpu._sbc },
-			{ cycles: 6, mode: cpu._zpgX, op: cpu._inc },
-			{ cycles: 6, mode: cpu._zpgX, op: cpu._nop },
-			{ cycles: 2, mode: cpu._imp, op: cpu._sed },
-			{ cycles: 4, mode: cpu._absY, op: cpu._sbc },
-			{ cycles: 2, mode: cpu._imp, op: cpu._nop },
-			{ cycles: 7, mode: cpu._absY, op: cpu._nop },
-			{ cycles: 4, mode: cpu._absX, op: cpu._nop },
-			{ cycles: 4, mode: cpu._absX, op: cpu._sbc },
-			{ cycles: 7, mode: cpu._absX, op: cpu._inc },
-			{ cycles: 7, mode: cpu._absX, op: cpu._nop }
+			{ cycles: 2, mode: cpu._rel.bind(cpu), op: cpu._beq.bind(cpu) },
+			{ cycles: 5, mode: cpu._indY.bind(cpu), op: cpu._sbc.bind(cpu) },
+			{ cycles: 0, mode: cpu._imp.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._indY.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._zpgX.bind(cpu), op: cpu._sbc.bind(cpu) },
+			{ cycles: 6, mode: cpu._zpgX.bind(cpu), op: cpu._inc.bind(cpu) },
+			{ cycles: 6, mode: cpu._zpgX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._sed.bind(cpu) },
+			{ cycles: 4, mode: cpu._absY.bind(cpu), op: cpu._sbc.bind(cpu) },
+			{ cycles: 2, mode: cpu._imp.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 7, mode: cpu._absY.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._absX.bind(cpu), op: cpu._nop.bind(cpu) },
+			{ cycles: 4, mode: cpu._absX.bind(cpu), op: cpu._sbc.bind(cpu) },
+			{ cycles: 7, mode: cpu._absX.bind(cpu), op: cpu._inc.bind(cpu) },
+			{ cycles: 7, mode: cpu._absX.bind(cpu), op: cpu._nop.bind(cpu) }
 		];
 	}
 }
@@ -872,6 +872,12 @@ export class MOS6500
 		return this._absAddr;
 	}
 
+	/** Returns the mnemonic of the last opcode processed */
+	get lastMnemonic()
+	{
+		return Mnemonics[this._op].op;
+	}
+
 	/** Returns the last opcode processed */
 	get lastOp()
 	{
@@ -961,9 +967,7 @@ export class MOS6500
 	_branch()
 	{
 		this._cycles++;
-		
-		// signedness checking
-		this._absAddr = this._pc + ((this._relAddr & 128) == 0 ? this._relAddr : -(this._relAddr & 128));
+		this._absAddr = this._pc + this._relAddr;
 
 		// need additional cycle if different page
 		if ((this._absAddr & 0xFF00) != (this._pc & 0xFF00))
@@ -1018,9 +1022,9 @@ export class MOS6500
 	}
 
 	/** Retrieve a byte from ROM */
-	_getRomByte()
+	_getRomByte(relative = false)
 	{
-		return this._bus.getUint8(this._pc++);
+		return relative ? this._bus.getInt8(this._pc++) : this._bus.getUint8(this._pc++);
 	}
 
 	/** Retrieve a word from ROM */
@@ -1109,11 +1113,11 @@ export class MOS6500
 	/** Store a byte to the stack */
 	_setStackByte(data)
 	{
-		this._stack.setUint8(this._s--, data);
+		this._bus.setUint8(this._s--, data);
 	}
 
 	/** Store a word to the stack */
-	_setStackWord()
+	_setStackWord(data)
 	{
 		this._setStackByte(data & 255);
 		this._setStackByte((data & 0xFF00) >> 8);
@@ -1177,7 +1181,10 @@ export class MOS6500
 	/** Indirect address with X offset */
 	_indX()
 	{
-		this._absAddr = this._bus.getUint16((this._getRomWord() + this._x) & 255);
+		var t = this._getRomWord();
+		var lo = this._bus.getUint8((t + this._x) & 255);
+		var hi = this._bus.getUint8((t + this._x + 1) & 255);
+		this._absAddr = (hi << 8) | lo;
 		return 0;
 	}
 
@@ -1195,33 +1202,28 @@ export class MOS6500
 	/** Relative address */
 	_rel()
 	{
-		this._relAddr = this._getRomByte();
-
-		// check signedness
-		if (this._relAddr & 128)
-			this._relAddr |= 0xFF00;
-		
+		this._relAddr = this._getRomByte(true);
 		return 0;
 	}
 
 	/** Zero page address */
 	_zpg()
 	{
-		this._relAddr = this._getRomByte();
+		this._absAddr = this._getRomByte();
 		return 0;
 	}
 
 	/** Zero page address with X offset */
 	_zpgX()
 	{
-		this._relAddr = (this._getRomByte() + this._x) & 255;
+		this._absAddr = (this._getRomByte() + this._x) & 255;
 		return 0;
 	}
 
 	/** Zero page address with Y offset */
 	_zpgY()
 	{
-		this._relAddr = (this._getRomByte() + this._y) & 255;
+		this._absAddr = (this._getRomByte() + this._y) & 255;
 		return 0;
 	}
 
@@ -1320,7 +1322,7 @@ export class MOS6500
 		this._setState(Flag.B, true);
 		this._setStackByte(this._p);
 		this._setState(Flag.B, false);
-		this._pc = this._bus,getUint16(65534);
+		this._pc = this._bus.getUint16(65534);
 		return 0;
 	}
 
