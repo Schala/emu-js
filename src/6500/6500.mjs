@@ -715,7 +715,6 @@ export class MOS6500
 	{
 		this._ops = new Opcodes(this);
 		this._bus = bus;
-		this.rom = null;
 		
 		// stack pointer
 		this._s = 253;

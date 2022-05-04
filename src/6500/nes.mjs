@@ -185,10 +185,20 @@ export class PPU2C02
 		this._lastAddr = 0;
 		this._x = 0;
 		this._y = 0;
+	}
 
-		this._status = 0;
-		this._mask = 0;
-		this._ctrl = 0;
+	/** Gets the address register */
+	get addr()
+	{
+		return this._nes.bus.getUint8(8198);
+	}
+
+	/** Sets the address register. This requires two calls, as the address is 14 bits. Only 8 bits at a time can be set. */
+	set addr(value)
+	{
+		// mirror across RAM
+		for (let i = 8198; i < 16384; i += 8)
+			this._nes.bus.setUint8(i, value);
 	}
 
 	/** Returns a reference to the bus */
@@ -197,12 +207,92 @@ export class PPU2C02
 		return this._bus;
 	}
 
+	/** Gets the control register */
+	get ctrl()
+	{
+		return this._nes.bus.getUint8(8192);
+	}
+
+	/** Sets the control register */
+	set ctrl(value)
+	{
+		// mirror across RAM
+		for (let i = 8192; i < 16384; i += 8)
+			this._nes.bus.setUint8(i, value);
+	}
+
+	/** Gets the data register */
+	get data()
+	{
+		return this._nes.bus.getUint8(8199);
+	}
+
+	/** Sets the data register */
+	set data(value)
+	{
+		// mirror across RAM
+		for (let i = 8199; i < 16384; i += 8)
+			this._nes.bus.setUint8(i, value);
+	}
+
+	/** Gets the OAM DMA register */
+	get dma()
+	{
+		return this._nes.bus.getUint8(16404);
+	}
+
 	/** Loads a CHR bank into bus RAM
 	 * @param {ArrayBuffer} chr - CHR bank
 	*/
 	loadChr(chr)
 	{
 		this._bus.addRam(0, chr);
+	}
+
+	/** Gets the mask register */
+	get mask()
+	{
+		return this._nes.bus.getUint8(8193);
+	}
+
+	/** Sets the mask register */
+	set mask(value)
+	{
+		// mirror across RAM
+		for (let i = 8193; i < 16384; i += 8)
+			this._nes.bus.setUint8(i, value);
+	}
+
+	/** Gets the OAM address register */
+	get oamAddr()
+	{
+		return this._nes.bus.getUint8(8195);
+	}
+
+	/** Gets the OAM data register */
+	get oamData()
+	{
+		return this._nes.bus.getUint8(8196);
+	}
+
+	/** Gets the scroll register */
+	get scroll()
+	{
+		return this._nes.bus.getUint8(8197);
+	}
+
+	/** Gets the status register */
+	get status()
+	{
+		return this._nes.bus.getUint8(8194);
+	}
+
+	/** Sets the status register */
+	set status(value)
+	{
+		// mirror across RAM
+		for (let i = 8194; i < 16384; i += 8)
+			this._nes.bus.setUint8(i, value);
 	}
 }
 
