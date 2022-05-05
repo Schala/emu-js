@@ -80,36 +80,71 @@ const MapInfo =
 	MirrorVertical: 1,
 	BatteryBackedRAM: 2,
 	Trainer: 4,
-	FourScreenVRAMLayout: 8,
-	VSSystemCart: 256
+	FourScreenVRAM: 8,
+	TypeLo: 240,
+	VSSystemCart: 256,
+	PlayChoice: 512,
+	NES2_0: 3072,
+	TypeHi: 61440,
+	PAL: 65536,
+	TVSystem: 50331648,
+	PRGRAM: 268435456,
+	BusConflicts: 536870912
 }
+
+const INESMagic = 0x4E45531A; // NES\x1A
 
 /** An NES program cart */
 export class ROM
 {
 	/**
-	 * Load a ROM from a filepath
+	 * Load a ROM from a buffer
 	 * @constructor
 	 * @param {NES} nes - NES instance
-	 * @param {string} path - ROM file path
+	 * @param {ArrayBuffer} buffer - ROM data buffer
 	*/
-	constructor(nes, path)
+	constructor(nes, buffer)
 	{
+		let view = new DataView(buffer);
+
+		for (let i = 0; i < 4; i++)
+			if (view.getUint8(i) !== INESMagic[i])
+				throw new Error("Not a valid NES ROM");
+
 		this._nes = nes;
-		this._prgPages =
-		this._chrPages =
+		this._prgPages = view.getUint8(4);
+		this._chrPages = view.getUint8(5);
 
-		// program memory
-		this._prg = new ArrayBuffer(16384);
-		nes.bus.addRam(32768, this._prg);
-		if (this._prgPages == 1)
-			nes.bus.addRam(49152, this._prg); // mirrored
+		// flags
+		this._mapFlags = (view.getUint8(6) & 255) | ((view.getUint8(7) & 255) << 8) | ((view.getUint8(9) & 255) << 16) |
+			((view.getUint8(10) & 255) << 24);
+		this._mapId = ((mapFlags & MapInfo.TypeHi) << 4) | (mapFlags & MapInfo.TypeLo);
 
-		// graphics memory
-		this._chr = new ArrayBuffer(8192);
-		nes.ppu.loadChr(this._chr);
-		this._mapFlags =
-		this._mapId =
+		this._prgRamSize = view.getUint8(8);
+
+		// trainer, if present
+		this._trainer = [];
+		let ptr = 16;
+		if (this._mapFlags & MapInfo.Trainer == MapInfo.Trainer)
+		{
+			for (let i = 16; i < 528; i++)
+				this._trainer.push(view.getUint8(i));
+			nes.bus.load(this._trainer, 28672);
+			ptr += 512;
+		}
+
+		// PRG
+		this._prg = [];
+		for (let i = ptr; i < (ptr + (this._prgPages * 16384)); i++)
+			this._prg.push(view.getUint8(i));
+		this.switchPrg(0);
+		ptr += this._prgPages * 16384;
+
+		// CHR
+		this._chr = [];
+		for (let i = ptr; i < (ptr + (this._chrPages * 8192)); i++)
+			this._chr.push(view.getUint8(i));
+		this.switchChr(0);
 
 		// integrity check checksum
 		this._hash = 0xDEADBEEF;
@@ -117,6 +152,30 @@ export class ROM
 			this._hash = ((this._hash << 1) | (this._hash & 0x80000000) ? 1 : 0) ^ b;
 		for (let b of this._chr)
 			this._hash = ((this._hash << 1) | (this._hash & 0x80000000) ? 1 : 0) ^ b;
+	}
+
+	/**
+	 * Switch the CHR ROM bank
+	 * @param {number} bank - 0-based bank index to use
+	*/
+	switchChr(bank)
+	{
+		if (bank >= this._chrPages)
+			return;
+		
+		nes.bus.load(this._chr.slice((bank + 1) * 8192));
+	}
+
+	/**
+	 * Switch the PRG ROM bank
+	 * @param {number} bank - 0-based bank index to use
+	*/
+	switchPrg(bank)
+	{
+		if (bank >= this._prgPages)
+			return;
+		
+		nes.bus.load(this._prg.slice((bank + 1) * 16384));
 	}
 
 	/** Returns the integrity hash */
@@ -190,15 +249,13 @@ export class PPU2C02
 	/** Gets the address register */
 	get addr()
 	{
-		return this._nes.bus.getUint8(8198);
+		return this._nes.getByte(8198);
 	}
 
 	/** Sets the address register. This requires two calls, as the address is 14 bits. Only 8 bits at a time can be set. */
 	set addr(value)
 	{
-		// mirror across RAM
-		for (let i = 8198; i < 16384; i += 8)
-			this._nes.bus.setUint8(i, value);
+		this._nes.setByte(8198, value);
 	}
 
 	/** Returns a reference to the bus */
@@ -210,29 +267,25 @@ export class PPU2C02
 	/** Gets the control register */
 	get ctrl()
 	{
-		return this._nes.bus.getUint8(8192);
+		return this._nes.getByte(8192);
 	}
 
 	/** Sets the control register */
 	set ctrl(value)
 	{
-		// mirror across RAM
-		for (let i = 8192; i < 16384; i += 8)
-			this._nes.bus.setUint8(i, value);
+		this._nes.setByte(8192, value);
 	}
 
 	/** Gets the data register */
 	get data()
 	{
-		return this._nes.bus.getUint8(8199);
+		return this._nes.getByte(8199);
 	}
 
 	/** Sets the data register */
 	set data(value)
 	{
-		// mirror across RAM
-		for (let i = 8199; i < 16384; i += 8)
-			this._nes.bus.setUint8(i, value);
+		this._nes.setByte(8199, value);
 	}
 
 	/** Gets the OAM DMA register */
@@ -243,56 +296,53 @@ export class PPU2C02
 
 	/** Loads a CHR bank into bus RAM
 	 * @param {ArrayBuffer} chr - CHR bank
+	 * @param {number} offset - Offset of the bank in CHR memory
 	*/
-	loadChr(chr)
+	loadChr(chr, ofset = 0)
 	{
-		this._bus.addRam(0, chr);
+		this._bus.load(chr, 0);
 	}
 
 	/** Gets the mask register */
 	get mask()
 	{
-		return this._nes.bus.getUint8(8193);
+		return this._nes.getByte(8193);
 	}
 
 	/** Sets the mask register */
 	set mask(value)
 	{
-		// mirror across RAM
-		for (let i = 8193; i < 16384; i += 8)
-			this._nes.bus.setUint8(i, value);
+		this._nes.setByte(8193, value);
 	}
 
 	/** Gets the OAM address register */
 	get oamAddr()
 	{
-		return this._nes.bus.getUint8(8195);
+		return this._nes.getByte(8195);
 	}
 
 	/** Gets the OAM data register */
 	get oamData()
 	{
-		return this._nes.bus.getUint8(8196);
+		return this._nes.getByte(8196);
 	}
 
 	/** Gets the scroll register */
 	get scroll()
 	{
-		return this._nes.bus.getUint8(8197);
+		return this._nes.getByte(8197);
 	}
 
 	/** Gets the status register */
 	get status()
 	{
-		return this._nes.bus.getUint8(8194);
+		return this._nes.getByte(8194);
 	}
 
 	/** Sets the status register */
 	set status(value)
 	{
-		// mirror across RAM
-		for (let i = 8194; i < 16384; i += 8)
-			this._nes.bus.setUint8(i, value);
+		this._nes.setByte(8194, value);
 	}
 }
 
@@ -320,6 +370,18 @@ export class NES
 		return this._cpu;
 	}
 
+	/** Retrieve a single byte from the specified address */
+	getByte(addr)
+	{
+		// CPU RAM
+		if (addr >= 0 && addr < 8192)
+			return this.bus.getUint8(addr & 2048);
+		
+		// PPU RAM
+		if (addr >= 8192 && addr < 16384)
+			return this.bus.getUint8((addr & 8) + 8192);
+	}
+
 	/**
 	 * Loads a ROM
 	 * @param {string} path - File path of the ROM
@@ -339,5 +401,29 @@ export class NES
 	get rom()
 	{
 		return this._rom;
+	}
+
+	/** Writes a single byte to the specified address */
+	setByte(addr, data)
+	{
+		// CPU RAM
+		if (addr >= 0 && addr < 8192)
+		{
+			// mirror the write
+			addr &= 2048
+			for (; addr < 8192; addr += 2048)
+				this.bus.setUint8(addr, data);
+			return;
+		}
+		
+		// PPU RAM
+		if (addr >= 8192 && addr < 16384)
+		{
+			// mirror the write
+			addr = (addr & 8) + 8192;
+			for (; addr < 16384; addr += 8)
+				this.bus.setUint8(addr, data);
+			return;
+		}
 	}
 }
