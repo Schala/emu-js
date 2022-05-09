@@ -5,27 +5,27 @@
 		import * as emu from "./emulator.mjs";
 		import * as mos6500 from "./6500/6500.mjs";
 
-		var execbtn = document.getElementById("execbtn");
-		var loadbtn = document.getElementById("loadbtn");
+		let execbtn = document.getElementById("execbtn");
+		let loadbtn = document.getElementById("loadbtn");
 
-		var a = document.getElementById("a");
-		var x = document.getElementById("x");
-		var y = document.getElementById("y");
-		var s = document.getElementById("s");
-		var pc = document.getElementById("pc");
-		var abs = document.getElementById("abs");
-		var rel = document.getElementById("rel");
-		var p = document.getElementById("p");
-		var op = document.getElementById("op");
-		var hex = document.getElementById("ramhex");
+		let a = document.getElementById("a");
+		let x = document.getElementById("x");
+		let y = document.getElementById("y");
+		let s = document.getElementById("s");
+		let pc = document.getElementById("pc");
+		let abs = document.getElementById("abs");
+		let rel = document.getElementById("rel");
+		let p = document.getElementById("p");
+		let op = document.getElementById("op");
+		let hex = document.getElementById("ramhex");
 
-		var bus = new emu.Bus(65536);
-		var cpu = new mos6500.MOS6500(bus);
+		let bus = new emu.Bus(65536);
+		let cpu = new mos6500.MOS6500(bus);
 
 		loadbtn.addEventListener("click", () =>
 		{
-			var code = document.getElementById("code");
-			var raw = [];
+			let code = document.getElementById("code");
+			let raw = [];
 			code.value.replaceAll('\n', ' ').split(' ').forEach(element => raw.push(parseInt(element, 16)));
 			bus.load(raw, 8192);
 

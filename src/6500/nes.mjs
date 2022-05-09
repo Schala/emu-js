@@ -58,7 +58,7 @@ export class GameGenie
 	/** Convert and add a cheat */
 	addCheat(cheat)
 	{
-		var code = [];
+		let code = [];
 
 		
 	}

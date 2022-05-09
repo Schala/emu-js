@@ -323,7 +323,7 @@ export class Disassembly
 	constructor(ram, offset = 0)
 	{		
 		this.start = offset;
-		var op = ram.getUint8(offset++);
+		let op = ram.getUint8(offset++);
 		this.code = Mnemonics[op].op;
 
 		switch (Mnemonics[op].mode)
@@ -363,7 +363,7 @@ export class Disassembly
 				offset += 2;
 				break;
 			case Mode.Rel:
-				var rel = ram.getInt8(offset++);
+				let rel = ram.getInt8(offset++);
 				this.code += " $" + rel.toString(16).toUpperCase() + " [$" +
 					(offset + rel).toString(16).toUpperCase().padStart(4, '0') + ']';
 			default: ; // implied takes no operands
@@ -771,8 +771,8 @@ export class MOS6500
 
 			// set cycles and see if any additional cycles are needed
 			this._cycles = this._ops.table[this._op].cycles;
-			var extra1 = this._ops.table[this._op].mode(this);
-			var extra2 = this._ops.table[this._op].op(this);
+			let extra1 = this._ops.table[this._op].mode(this);
+			let extra2 = this._ops.table[this._op].op(this);
 			this._cycles += extra1 & extra2;
 
 			this._setState(Flag.U, true); // always set
@@ -1135,7 +1135,7 @@ export class MOS6500
 	/** Absolute address with X offset */
 	_absX()
 	{
-		var addr = this._getRomWord();
+		let addr = this._getRomWord();
 		this._absAddr += this._x;
 		return (this._absAddr & 0xFF00) == (addr & 0xFF00) ? 0 : 1;
 	}
@@ -1143,7 +1143,7 @@ export class MOS6500
 	/** Absolute address with Y offset */
 	_absY()
 	{
-		var addr = this._getRomWord();
+		let addr = this._getRomWord();
 		this._absAddr += this._y;
 		return (this._absAddr & 0xFF00) == (addr & 0xFF00) ? 0 : 1;
 	}
@@ -1165,7 +1165,7 @@ export class MOS6500
 	/** Indirect address */
 	_ind()
 	{
-		var ptr = this._getRomWord();
+		let ptr = this._getRomWord();
 
 		if ((ptr & 255) == 0)
 			// emulate page boundary bug
@@ -1180,9 +1180,9 @@ export class MOS6500
 	/** Indirect address with X offset */
 	_indX()
 	{
-		var t = this._getRomWord();
-		var lo = this._bus.getUint8((t + this._x) & 255);
-		var hi = this._bus.getUint8((t + this._x + 1) & 255);
+		let t = this._getRomWord();
+		let lo = this._bus.getUint8((t + this._x) & 255);
+		let hi = this._bus.getUint8((t + this._x + 1) & 255);
 		this._absAddr = (hi << 8) | lo;
 		return 0;
 	}
@@ -1190,9 +1190,9 @@ export class MOS6500
 	/** Indirect address with Y offset */
 	_indY()
 	{
-		var t = this._getRomWord();
-		var lo = this._bus.getUint8(t & 255);
-		var hi = this._bus.getUint8((t + 1) & 255);
+		let t = this._getRomWord();
+		let lo = this._bus.getUint8(t & 255);
+		let hi = this._bus.getUint8((t + 1) & 255);
 		this._absAddr = (hi << 8) | lo + this._y;
 
 		return this._absAddr == (hi << 8) ? 0 : 1;
@@ -1232,7 +1232,7 @@ export class MOS6500
 	/** Add with carry */
 	_adc()
 	{
-		var tmp = this._a + this._fetchByte() + (this.isCarry ? 1 : 0);
+		let tmp = this._a + this._fetchByte() + (this.isCarry ? 1 : 0);
 		this._setCNZ(tmp);
 		this._setState(Flag.V, ~((this._a ^ this._cache) & (this._a ^ tmp) & 128));
 		this._a = tmp & 255;
@@ -1250,7 +1250,7 @@ export class MOS6500
 	/** Arithmetical shift left */
 	_asl()
 	{
-		var tmp = this._fetchByte() << 1;
+		let tmp = this._fetchByte() << 1;
 		this._setCNZ(tmp);
 		this._checkMode(tmp);
 		return 0;
@@ -1372,7 +1372,7 @@ export class MOS6500
 	/** Compare accumulator */
 	_cmp()
 	{
-		var tmp = this._a - this._fetchByte();
+		let tmp = this._a - this._fetchByte();
 		if (this._a >= this._cache)
 			this._sec();
 		this._setNZ(tmp);
@@ -1382,7 +1382,7 @@ export class MOS6500
 	/** Compare X */
 	_cpx()
 	{
-		var tmp = this._x - this._fetchByte();
+		let tmp = this._x - this._fetchByte();
 		if (this._x >= this._cache)
 			this._sec();
 		this._setNZ(tmp);
@@ -1392,7 +1392,7 @@ export class MOS6500
 	/** Compare Y */
 	_cpy()
 	{
-		var tmp = this._y - this._fetchByte();
+		let tmp = this._y - this._fetchByte();
 		if (this._y >= this._cache)
 			this._sec();
 		this._setNZ(tmp);
@@ -1402,7 +1402,7 @@ export class MOS6500
 	/** Decrement operand */
 	_dec()
 	{
-		var tmp = this._fetchByte() - 1;
+		let tmp = this._fetchByte() - 1;
 		this._setLastByte(tmp);
 		this._setNZ(tmp);
 		return 0;
@@ -1433,7 +1433,7 @@ export class MOS6500
 	/** Increment operand */
 	_inc()
 	{
-		var tmp = (this._fetchByte() + 1) & 255;
+		let tmp = (this._fetchByte() + 1) & 255;
 		this._setLastByte(tmp);
 		this._setNZ(tmp);
 		return 0;
@@ -1504,7 +1504,7 @@ export class MOS6500
 	{
 		if ((this._fetchByte() & 1) != 0)
 			this._sec();
-		var tmp = this._cache >> 1;
+		let tmp = this._cache >> 1;
 		this._setNZ(tmp);
 		this._checkMode(tmp);
 		return 0;
@@ -1578,7 +1578,7 @@ export class MOS6500
 	/** Rotate left */
 	_rol()
 	{
-		var tmp = (this._fetchByte() << 1) | (this.isCarry ? 1 : 0);
+		let tmp = (this._fetchByte() << 1) | (this.isCarry ? 1 : 0);
 		this._setCNZ(tmp);
 		this._checkMode(tmp);
 		return 0;
@@ -1588,7 +1588,7 @@ export class MOS6500
 	_ror()
 	{
 		this._fetchByte();
-		var tmp = (this._cache << 7) | (this._cache >> 1);
+		let tmp = (this._cache << 7) | (this._cache >> 1);
 		if ((this._cache & 1) != 0)
 			this._sec();
 		this._checkMode(tmp);
@@ -1617,8 +1617,8 @@ export class MOS6500
 	/** Subtract with carry */
 	_sbc()
 	{
-		var value = this._fetchByte() ^ 255; // invert
-		var tmp = this._a + this._fetchByte() + (this.isCarry ? 1 : 0);
+		let value = this._fetchByte() ^ 255; // invert
+		let tmp = this._a + this._fetchByte() + (this.isCarry ? 1 : 0);
 		this._setCNZ(tmp);
 		this._setState(Flag.V, (tmp ^ this._a) & ((tmp ^ value) & 128));
 		this._a = tmp & 255;

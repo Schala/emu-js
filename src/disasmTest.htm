@@ -4,27 +4,27 @@
 	<script type="module">
 		import * as mos6500 from "./6500/6500.mjs";
 
-		var btn = document.getElementById("execbtn");
+		let btn = document.getElementById("execbtn");
 		btn.addEventListener("click", () =>
 		{
-			var code = document.getElementById("code");
-			var disasm = document.getElementById("disassembly");
-			var raw = [];
+			let code = document.getElementById("code");
+			let disasm = document.getElementById("disassembly");
+			let raw = [];
 			code.value.replaceAll('\n', ' ').split(' ').forEach(element => raw.push(parseInt(element, 16)));
 
-			var bytes = new DataView(new Uint8Array(raw).buffer);
-			var ptr = 0;
-			var disassembly = [];
-			var str="";
+			let bytes = new DataView(new Uint8Array(raw).buffer);
+			let ptr = 0;
+			let disassembly = [];
+			let str = "";
 
 			while (ptr < bytes.byteLength)
 			{
-				var rec = new mos6500.Disassembly(bytes, ptr);
+				let rec = new mos6500.Disassembly(bytes, ptr);
 				ptr = rec.end;
 				disassembly.push(rec);
 			}
 
-			for (var d of disassembly)
+			for (let d of disassembly)
 				disasm.value += d.start.toString(16).toUpperCase().padStart(4, '0') + ": " + d.code + '\n';
 		});
 	</script>

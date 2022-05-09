@@ -7,27 +7,27 @@
 */
 export function hexdump(data, offset = 0)
 {
-	var output = "";
-	for (var y = 0; y < data.byteLength >> 4; y++)
+	let output = "";
+	for (let y = 0; y < data.byteLength >> 4; y++)
 	{
 		// offset
 		output += ((y << 4) + offset).toString(16).toUpperCase().padStart(4, '0') + ": ";
 
 		// byte content
-		for (var x = 0; x < 16; x++)
+		for (let x = 0; x < 16; x++)
 			output += data.getUint8((y << 4) + x).toString(16).toUpperCase().padStart(2, '0') + ' ';
 		output += '\t';
 
 		// ASCII
-		for (var x = 0; x < 16; x++)
+		for (let x = 0; x < 16; x++)
 		{
-			var b = data.getUint8((y << 4) + x);
+			let b = data.getUint8((y << 4) + x);
 
 			// ensure it's printable
 			if (!(b >= 32 && b <= 127))
 				b = 46; // '.'
 
-			var c = String.fromCharCode(b);
+			let c = String.fromCharCode(b);
 			output += c;
 		}
 		output += '\n';
