@@ -138,8 +138,12 @@ export class Bus
 	}
 
 	/** Loads a buffer into RAM */
-	load(buffer, offset = 0)
+	load(buffer, offset = 0, wipeRam = false)
 	{
+		if (wipeRam)
+			for (let i = 0; i < this._ram.byteLength; i++)
+				this._ram.setUint8(i, 0);
+
 		let view = new Uint8Array(buffer);
 		for (let i = 0; i < view.length; i++)
 			this._ram.setUint8(i + offset, view[i]);

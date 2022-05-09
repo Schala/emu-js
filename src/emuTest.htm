@@ -6,7 +6,6 @@
 		import * as mos6500 from "./6500/6500.mjs";
 
 		let execbtn = document.getElementById("execbtn");
-		let loadbtn = document.getElementById("loadbtn");
 
 		let a = document.getElementById("a");
 		let x = document.getElementById("x");
@@ -18,18 +17,38 @@
 		let p = document.getElementById("p");
 		let op = document.getElementById("op");
 		let hex = document.getElementById("ramhex");
+		let offs = document.getElementById("offset");
+		let refbtn = document.getElementById("refbtn");
 
 		let bus = new emu.Bus(65536);
 		let cpu = new mos6500.MOS6500(bus);
 
-		loadbtn.addEventListener("click", () =>
-		{
-			let code = document.getElementById("code");
-			let raw = [];
-			code.value.replaceAll('\n', ' ').split(' ').forEach(element => raw.push(parseInt(element, 16)));
-			bus.load(raw, 8192);
+		let lastInput = null;
 
-			cpu.entry = 8192;
+		window.load = function(input)
+		{
+			bin = input.files[0].arrayBuffer().then((buf) =>
+			{
+				lastInput = buf;
+
+				let offset = parseInt(offs.value);
+				bus.load(lastInput, offset);
+
+				cpu.entry = offset;
+				cpu.reset();
+				hex.innerHTML = emu.hexdump(bus.ram);
+			});
+		}
+
+		refbtn.addEventListener("click", () =>
+		{
+			if (lastInput === (null || undefined))
+				return;
+			
+			let offset = parseInt(offs.value);
+			bus.load(lastInput, offset, true);
+
+			cpu.entry = offset;
 			cpu.reset();
 			hex.innerHTML = emu.hexdump(bus.ram);
 		});
@@ -57,19 +76,15 @@
 	<body>
 		<table>
 			<tr>
-				<td colspan="3">
-					<textarea id="code" wrap="off" cols="120" rows="10"></textarea>
+				<td>
+					<input type="file" onchange="load(this)">
 				</td>
-			</tr>
-			<tr>
 				<td>
 					Offset: <input id="offset" size="4" value="0"></input>
 				</td>
 				<td>
 					<button type="button" id="execbtn">Clock</button>
-				</td>
-				<td>
-					<button type="button" id="loadbtn">Load</button>
+					<button type="button" id="refbtn">Refresh</button>
 				</td>
 			</tr>
 			<tr>
