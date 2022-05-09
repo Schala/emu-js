@@ -27,7 +27,7 @@
 
 		window.load = function(input)
 		{
-			bin = input.files[0].arrayBuffer().then((buf) =>
+			input.files[0].arrayBuffer().then((buf) =>
 			{
 				lastInput = buf;
 
