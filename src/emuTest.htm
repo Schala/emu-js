@@ -31,7 +31,7 @@
 			{
 				lastInput = buf;
 
-				let offset = parseInt(offs.value);
+				let offset = parseInt(offs.value, 16);
 				bus.load(lastInput, offset);
 
 				cpu.entry = offset;

@@ -24,11 +24,10 @@ export function hexdump(data, offset = 0)
 			let b = data.getUint8((y << 4) + x);
 
 			// ensure it's printable
-			if (!(b >= 32 && b <= 127))
+			if (b < 32)
 				b = 46; // '.'
 
-			let c = String.fromCharCode(b);
-			output += c;
+			output += String.fromCharCode(b);
 		}
 		output += '\n';
 	}
@@ -94,6 +93,21 @@ export class Bus
 	}
 
 	/**
+	 * Retrieves a signed quad word in the bus's memory storage
+	 * @param {number} offset - Offset into memory
+	 * @param {boolean} littleEndian - Do we read the bytes in little endian order?
+	*/
+	getInt64(offset, littleEndian = true)
+	{
+		if (offset < 0)
+			throw new Error("Offset must be greater than or equal to 0");
+		if (offset >= this._ram.byteLength)
+			throw new Error("Offset out of bus's memory range (" + this._ram.byteLength + ')');
+
+		return this._ram.getBigInt64(offset, littleEndian);
+	}
+
+	/**
 	 * Retrieves an unsigned byte in the bus's memory storage
 	 * @param {number} offset - Offset into memory
 	*/
@@ -136,6 +150,21 @@ export class Bus
 
 		return this._ram.getUint32(offset, littleEndian);
 	}
+
+	/**
+	 * Retrieves an unsigned quad word in the bus's memory storage
+	 * @param {number} offset - Offset into memory
+	 * @param {boolean} littleEndian - Do we read the bytes in little endian order?
+	 */
+	 getUint64(offset, littleEndian = true)
+	 {
+		 if (offset < 0)
+			 throw new Error("Offset must be greater than or equal to 0");
+		 if (offset >= this._ram.byteLength)
+			 throw new Error("Offset out of bus's memory range (" + this._ram.byteLength + ')');
+ 
+		 return this._ram.getBigUint64(offset, littleEndian);
+	 }
 
 	/** Loads a buffer into RAM */
 	load(buffer, offset = 0, wipeRam = false)
