@@ -1,0 +1,99 @@
+<!DOCTYPE HTML>
+<html>
+	<title>NES test</title>
+	<script type="module">
+		import * as nes from "./nes.mjs";
+
+		let execbtn = document.getElementById("execbtn");
+
+		let a = document.getElementById("a");
+		let x = document.getElementById("x");
+		let y = document.getElementById("y");
+		let s = document.getElementById("s");
+		let pc = document.getElementById("pc");
+		let abs = document.getElementById("abs");
+		let rel = document.getElementById("rel");
+		let p = document.getElementById("p");
+		let op = document.getElementById("op");
+		let hex = document.getElementById("ramhex");
+		let refbtn = document.getElementById("refbtn");
+
+		let nintendo = new nes.NES();
+
+		let lastInput = null;
+
+		window.load = function(input)
+		{
+			input.files[0].arrayBuffer().then((buf) =>
+			{
+				lastInput = buf;
+
+				hex.innerHTML = emu.hexdump(nintendo.bus.ram);
+			});
+		}
+
+		refbtn.addEventListener("click", () =>
+		{
+			if (lastInput === (null || undefined))
+				return;
+			
+			let offset = parseInt(offs.value);
+			bus.load(lastInput, offset);
+
+			hex.innerHTML = emu.hexdump(bus.ram);
+		});
+
+		execbtn.addEventListener("click", () =>
+		{
+			cpu.clock();
+			while (cpu.cycles > 0)
+				cpu.clock();
+			a.innerHTML = "A: $" + cpu.accumulator.toString(16).toUpperCase().padStart(2, '0');
+			s.innerHTML = "S: $" + cpu.stackPtr.toString(16).toUpperCase().padStart(2, '0');
+			x.innerHTML = "X: $" + cpu.x.toString(16).toUpperCase().padStart(2, '0');
+			y.innerHTML = "Y: $" + cpu.y.toString(16).toUpperCase().padStart(2, '0');
+			op.innerHTML = "Last opcode: " + cpu.lastMnemonic.toUpperCase();
+			pc.innerHTML = "PC: $" + cpu.counter.toString(16).toUpperCase().padStart(4, '0');
+			abs.innerHTML = "Last absolute address: $" + cpu.lastAbsAddr.toString(16).toUpperCase().padStart(4, '0');
+			rel.innerHTML = "Last relative address: $" + cpu.lastRelAddr.toString(16).toUpperCase().padStart(2, '0');
+
+			p.innerHTML = (cpu.isCarry ? 'C' : 'x') + (cpu.isZero ? 'Z' : 'x') + (cpu.hasInterrupts ? 'I' : 'x') + (cpu.isDecimal ? 'D' : 'x') + 
+				(cpu.isBreak ? 'B' : 'x') + (cpu.isUndefined ? 'U' : 'x') + (cpu.isOverflow ? 'V' : 'x') + (cpu.isNegative ? 'N' : 'x');
+			
+			hex.innerHTML = emu.hexdump(bus.ram);
+		});
+	</script>
+	<body>
+		<table>
+			<tr>
+				<td>
+					<input type="file" onchange="load(this)">
+				</td>
+				<td>
+					<button type="button" id="execbtn">Clock</button>
+					<button type="button" id="refbtn">Refresh</button>
+				</td>
+			</tr>
+			<tr>
+				<td><label id="abs">Last absolute address: $0000</p></td>
+				<td><label id="rel">Last relative address: $00</p></td>
+				<td><label id="p">xxxxxxxx</p></td>
+			</tr>
+			<tr>
+				<td><label id="a">A: 0</p></td>
+				<td><label id="x">X: 0</p></td>
+				<td><label id="y">Y: 0</p></td>
+			</tr>
+			<tr>
+				<td><label id="s">SP: 0</p></td>
+				<td><label id="op">Last opcode: NOP</label></td>
+				<td><label id="pc">PC: $0000</p></td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<textarea id="ramhex" wrap="physical" cols="120" rows="16" readonly/></textarea>
+				</td>
+			</tr>
+		</table>
+	</body>
+</html>

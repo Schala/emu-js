@@ -75,6 +75,95 @@ export class GameGenie
 	}
 }
 
+/** Mapper base class */
+class Mapper
+{
+	/**
+	 * @constructor
+	 * @param {number} prgBanks - Number of ROM's PRG banks
+	 * @param {number} chrBanks - Number of ROM's CHR banks
+	*/
+	constructor(prgBanks, chrBanks)
+	{
+		this._prgBanks = prgBanks;
+		this._chrBanks = chrBanks;
+	}
+
+	/** Returns a boolean/mapped address pair. The boolean indicates if it is within the mapped boundary */
+	getCpuByte(addr)
+	{
+		return { address: addr, mapped: false };
+	}
+
+	/** Returns a boolean/mapped address pair. The boolean indicates if it is within the mapped boundary */
+	setCpuByte(addr)
+	{
+		return { address: addr, mapped: false };
+	}
+
+	/** Returns a boolean/mapped address pair. The boolean indicates if it is within the mapped boundary */
+	getPpuByte(addr)
+	{
+		return { address: addr, mapped: false };
+	}
+
+	/** Returns a boolean/mapped address pair. The boolean indicates if it is within the mapped boundary */
+	setPpuByte(addr)
+	{
+		return { address: addr, mapped: false };
+	}
+}
+
+/** Mapper 000 */
+class NROM extends Mapper
+{
+	/**
+	 * @constructor
+	 * @param {number} prgBanks - Number of ROM's PRG banks
+	 * @param {number} chrBanks - Number of ROM's CHR banks
+	*/
+	constructor(prgBanks, chrBanks)
+	{
+		super(prgBanks, chrBanks);
+	}
+
+	/** Returns a boolean/mapped address pair. The boolean indicates if it is within the mapped boundary */
+	getCpuByte(addr)
+	{
+		if (addr >= 32768 && addr <= 65535)
+		{
+			addr = addr & (this._prgBanks > 1 ? 32767 : 16383);
+			return { address: addr, mapped: true };
+		}
+
+		return { address: addr, mapped: false };
+	}
+
+	/** Returns a boolean/mapped address pair. The boolean indicates if it is within the mapped boundary */
+	setCpuByte(addr)
+	{
+		return { address: addr, mapped: false };
+	}
+
+	/** Returns a boolean/mapped address pair. The boolean indicates if it is within the mapped boundary */
+	getPpuByte(addr)
+	{
+		if (addr >= 0 && addr <= 16383)
+		{
+			// no mapping needed
+			return { address: addr, mapped: true };
+		}
+
+		return { address: addr, mapped: false };
+	}
+
+	/** Returns a boolean/mapped address pair. The boolean indicates if it is within the mapped boundary */
+	setPpuByte(addr)
+	{
+		return { address: addr, mapped: false };
+	}
+}
+
 const MapInfo =
 {
 	MirrorVertical: 1,
@@ -92,7 +181,7 @@ const MapInfo =
 	BusConflicts: 536870912
 }
 
-const INESMagic = 0x4E45531A; // NES\x1A
+const INESMagic = 0x4E45531A; // 'NES'\x1A
 
 /** An NES program cart */
 export class ROM
@@ -108,7 +197,7 @@ export class ROM
 		let view = new DataView(buffer);
 
 		for (let i = 0; i < 4; i++)
-			if (view.getUint8(i) !== INESMagic[i])
+			if (view.getUint32(i, false) !== INESMagic)
 				throw new Error("Not a valid NES ROM");
 
 		this._nes = nes;
@@ -119,6 +208,13 @@ export class ROM
 		this._mapFlags = (view.getUint8(6) & 255) | ((view.getUint8(7) & 255) << 8) | ((view.getUint8(9) & 255) << 16) |
 			((view.getUint8(10) & 255) << 24);
 		this._mapId = ((mapFlags & MapInfo.TypeHi) << 4) | (mapFlags & MapInfo.TypeLo);
+		this._mapper = null;
+
+		switch (this._mapId)
+		{
+			case 0: this._mapper = new NROM(this._prgPages, this._chrPages); break;
+			default: ;
+		}
 
 		this._prgRamSize = view.getUint8(8);
 
@@ -154,6 +250,56 @@ export class ROM
 			this._hash = ((this._hash << 1) | (this._hash & 0x80000000) ? 1 : 0) ^ b;
 	}
 
+	/** Returns the mapper flags */
+	get flags()
+	{
+		return this._mapFlags;
+	}
+
+	/** Fetches a mapped byte from the CPU's RAM */
+	getCpuByte(addr)
+	{
+		let mapped = this._mapper.getCpuByte(addr);
+
+		if (mapped.mapped)
+			return this._nes.cpu.getByte(mapped.address);
+		return 0;
+	}
+
+	/** Fetches a mapped byte from the PPU's RAM */
+	getPpuByte(addr)
+	{
+		let mapped = this._mapper.getPpuByte(addr);
+
+		if (mapped.mapped)
+			return this._nes.ppu.getByte(mapped.address);
+		return 0;
+	}
+
+	/** Returns the integrity hash */
+	get hash()
+	{
+		return this._hash;
+	}
+
+	/** Writes to a mapped address on the CPU's RAM */
+	setCpuByte(addr, data)
+	{
+		let mapped = this._mapper.setCpuByte(addr);
+
+		if (mapped.mapped)
+			this._nes.cpu.setByte(mapped.address, data);
+	}
+
+	/** Writes to a mapped address on the PPU's RAM */
+	setPpuByte(addr, data)
+	{
+		let mapped = this._mapper.setPpuByte(addr);
+
+		if (mapped.mapped)
+			this._nes.cpu.setByte(mapped.address, data);
+	}
+
 	/**
 	 * Switch the CHR ROM bank
 	 * @param {number} bank - 0-based bank index to use
@@ -176,12 +322,6 @@ export class ROM
 			return;
 		
 		nes.bus.load(this._prg.slice((bank + 1) * 16384));
-	}
-
-	/** Returns the integrity hash */
-	get hash()
-	{
-		return this._hash;
 	}
 }
 
@@ -235,7 +375,7 @@ export class PPU2C02
 		this._bus = new emulator.Bus(16384);
 
 		// Is the current frame done rendering?
-		this._frameDone = true;
+		this._frameDone = false;
 
 		// Are the remaining 6 bits of the address register pending a read?
 		this._addrLatch = false;
@@ -294,6 +434,75 @@ export class PPU2C02
 		return this._nes.bus.getUint8(16404);
 	}
 
+		/** Gets a byte from PPU RAM */
+	getByte(addr)
+	{
+		if (addr >= 0 && addr <= 8191)
+			// MSB + remaining bits
+			return this._bus.getByte(((addr & 4095) >> 12) * 64 + (addr & 4095));
+		else if (addr >= 16128 && addr <= 16383)
+		{
+			addr %= 32;
+			switch (addr)
+			{
+				case 20: addr = 4; break;
+				case 24: addr = 8; break;
+				case 28: addr = 12; break;
+				default: addr = 0;
+			}
+			return this._bus.getByte(addr);
+		}
+		else
+			return 0;
+	}
+
+	/** Gets data on the CPU RAM */
+	getCpuByte(addr)
+	{
+		addr %= 8;
+		let data = 0;
+
+		switch (addr)
+		{
+			case 2:
+				data = (this.status & 224) | (this._cache & 31);
+				this.status &= ~Status.VBlank;
+				this._addrLatch = false;
+				break;
+			case 7:
+				data = this._cache;
+				this._cache = this.getByte(this._lastAddr);
+				if (this._lastAddr > 16128) data = this._cache;
+				this._lastAddr++;
+				break;
+			default: ;
+		}
+
+		return data;
+	}
+
+	/** Gets a byte from PPU RAM */
+	getByte(addr)
+	{
+		if (addr >= 0 && addr <= 8191)
+			// MSB + remaining bits
+			return this._bus.getByte(((addr & 4095) >> 12) * 64 + (addr & 4095));
+		else if (addr >= 16128 && addr <= 16383)
+		{
+			addr %= 32;
+			switch (addr)
+			{
+				case 20: addr = 4; break;
+				case 24: addr = 8; break;
+				case 28: addr = 12; break;
+				default: addr = 0;
+			}
+			return this._bus.getByte(addr);
+		}
+		else
+			return 0;
+	}
+
 	/** Loads a CHR bank into bus RAM
 	 * @param {ArrayBuffer} chr - CHR bank
 	 * @param {number} offset - Offset of the bank in CHR memory
@@ -327,10 +536,73 @@ export class PPU2C02
 		return this._nes.getByte(8196);
 	}
 
+	/** Resets the PPU */
+	reset()
+	{
+		this._frameDone = false;
+		this._addrLatch = false;
+		this.addr = 0;
+		this.status = 0;
+		this.mask = 0;
+		this.ctrl = 0;
+		this._cache = 0;
+		this._x = 0;
+		this._y = 0;
+		this._bus.reset();
+	}
+
 	/** Gets the scroll register */
 	get scroll()
 	{
 		return this._nes.getByte(8197);
+	}
+
+	/** Writes a byte to PPU RAM */
+	setByte(addr, data)
+	{
+		if (addr >= 0 && addr <= 8191)
+			// MSB + remaining bits
+			this._bus.setByte(((addr & 4095) >> 12) * 64 + (addr & 4095), data);
+		else if (addr >= 16128 && addr <= 16383)
+		{
+			addr %= 32;
+			switch (addr)
+			{
+				case 20: addr = 4; break;
+				case 24: addr = 8; break;
+				case 28: addr = 12; break;
+				default: addr = 0;
+			}
+			this._bus.setByte(addr, data);
+		}
+	}
+
+	/** Writes data on the CPU RAM */
+	setCpuByte(addr, data)
+	{
+		addr %= 8;
+
+		switch (addr)
+		{
+			case 0: this.ctrl = data & 255; break;
+			case 1: this.mask = data & 255; break;
+			case 6: // remember to write hi byte on latch, lo byte otherwise
+				if (this._addrLatch)
+				{
+					this.addr = (this.addr & 255) | ((data & 255) << 8);
+					this._addrLatch = false;
+				}
+				else
+				{
+					this.addr = (this.addr & 65280) | (data & 255);
+					this._addrLatch = true;
+				}
+			case 7:
+				this.data = data & 255;
+				this.addr++;
+				break;
+			default: ;
+		}
 	}
 
 	/** Gets the status register */
@@ -384,17 +656,25 @@ export class NES
 
 	/**
 	 * Loads a ROM
-	 * @param {string} path - File path of the ROM
+	 * @param {ArrayBuffer} buffer - ROM data buffer
 	*/
-	loadRom(path)
+	loadRom(buffer)
 	{
-		this._rom = new ROM(this, path);
+		this._rom = new ROM(this, buffer);
 	}
 
 	/** Returns a reference to the PPU */
 	get ppu()
 	{
 		return this._ppu;
+	}
+
+	/** Resets the system */
+	reset()
+	{
+		this.ppu.reset();
+		this.cpu.reset();
+		this.bus.reset();
 	}
 
 	/** Returns a reference to the ROM */
