@@ -362,14 +362,24 @@ const Control =
 	NMI: 128
 }
 
+/** 2C02 palette */
+const PALETTE2C02 =
+[
+	84,  84,  84,    0,  30, 116,    8,  16, 144,   48,   0, 136,   68,   0, 100,   92,   0,  48,   84,   4,   0,   60,  24,   0,   32,  42,   0,    8,  58,   0,    0,  64,   0,    0,  60,   0,    0,  50,  60,    0,   0,   0,
+	152, 150, 152,    8,  76, 196,   48,  50, 236,   92,  30, 228,  136,  20, 176,  160,  20, 100,  152,  34,  32,  120,  60,   0,   84,  90,   0,   40, 114,   0,    8, 124,   0,    0, 118,  40,    0, 102, 120,    0,   0,   0,
+	236, 238, 236,   76, 154, 236,  120, 124, 236,  176,  98, 236,  228,  84, 236,  236,  88, 180,  236, 106, 100,  212, 136,  32,  160, 170,   0,  116, 196,   0,   76, 208,  32,   56, 204, 108,   56, 180, 204,   60,  60,  60,
+	236, 238, 236,  168, 204, 236,  188, 188, 236,  212, 178, 236,  236, 174, 236,  236, 174, 212,  236, 180, 176,  228, 196, 144,  204, 210, 120,  180, 222, 120,  168, 226, 144,  152, 226, 180,  160, 214, 228,  160, 162, 160
+];
+
 /** Picture processing unit */
 export class PPU2C02
 {
 	/**
 	 * @constructor
 	 * @param {NES} nes - NES instance
+	 * @param {CanvasRenderingContext2D} ctx - Canvas context to render to.
 	*/
-	constructor(nes)
+	constructor(nes, ctx)
 	{
 		this._nes = nes;
 		this._bus = new emulator.Bus(16384);
@@ -384,6 +394,9 @@ export class PPU2C02
 		this._lastAddr = 0;
 		this._x = 0;
 		this._y = 0;
+		
+		this._ctx = ctx;
+		this._buf = ctx.createImageData(261, 341);
 	}
 
 	/** Gets the address register */
@@ -402,6 +415,21 @@ export class PPU2C02
 	get bus()
 	{
 		return this._bus;
+	}
+
+	/** Executes one clock cycle */
+	clock()
+	{
+		if (++this._x >= 341)
+		{
+			this._x = 0;
+
+			if (++this._y >= 261)
+			{
+				this._y = -1;
+				this._frameDone = true;
+			}
+		}
 	}
 
 	/** Gets the control register */
@@ -434,7 +462,7 @@ export class PPU2C02
 		return this._nes.bus.getUint8(16404);
 	}
 
-		/** Gets a byte from PPU RAM */
+	/** Gets a byte from PPU RAM */
 	getByte(addr)
 	{
 		if (addr >= 0 && addr <= 8191)
@@ -442,14 +470,8 @@ export class PPU2C02
 			return this._bus.getByte(((addr & 4095) >> 12) * 64 + (addr & 4095));
 		else if (addr >= 16128 && addr <= 16383)
 		{
-			addr %= 32;
-			switch (addr)
-			{
-				case 20: addr = 4; break;
-				case 24: addr = 8; break;
-				case 28: addr = 12; break;
-				default: addr = 0;
-			}
+			addr = (addr % 32) - 16;
+			if (addr < 0) addr = 0;
 			return this._bus.getByte(addr);
 		}
 		else
@@ -471,8 +493,8 @@ export class PPU2C02
 				break;
 			case 7:
 				data = this._cache;
-				this._cache = this.getByte(this._lastAddr);
-				if (this._lastAddr > 16128) data = this._cache;
+				this._cache = this.getByte(this.lastAddr);
+				if (this.lastAddr > 16128) data = this._cache;
 				this._lastAddr++;
 				break;
 			default: ;
@@ -489,18 +511,108 @@ export class PPU2C02
 			return this._bus.getByte(((addr & 4095) >> 12) * 64 + (addr & 4095));
 		else if (addr >= 16128 && addr <= 16383)
 		{
-			addr %= 32;
-			switch (addr)
-			{
-				case 20: addr = 4; break;
-				case 24: addr = 8; break;
-				case 28: addr = 12; break;
-				default: addr = 0;
-			}
+			addr = (addr % 32) - 16;
+			if (addr < 0) addr = 0;
 			return this._bus.getByte(addr);
 		}
 		else
 			return 0;
+	}
+
+	get hasEnhancedBlue()
+	{
+		return (this.mask & Mask.EnhanceBlue) != 0;
+	}
+
+	get hasEnhancedGreen()
+	{
+		return (this.mask & Mask.EnhanceGreen) != 0;
+	}
+
+	get hasEnhancedRed()
+	{
+		return (this.mask & Mask.EnhanceRed) != 0;
+	}
+
+	get isGrayscale()
+	{
+		return (this.mask & Mask.Grayscale) != 0;
+	}
+
+	get isIncrement()
+	{
+		return (this.ctrl & Control.Increment) != 0;
+	}
+
+	get isNameTableX()
+	{
+		return (this.ctrl & Control.NameTableX) != 0;
+	}
+
+	get isNameTableY()
+	{
+		return (this.ctrl & Control.NameTableY) != 0;
+	}
+
+	get isNMI()
+	{
+		return (this.ctrl & Control.NMI) != 0;
+	}
+
+	get isOverflow()
+	{
+		return (this.status & Status.Overflow) != 0;
+	}
+
+	get isPatternBG()
+	{
+		return (this.ctrl & Control.PatternBG) != 0;
+	}
+
+	get isPatternFG()
+	{
+		return (this.ctrl & Control.PatternFG) != 0;
+	}
+
+	get isRenderBG()
+	{
+		return (this.mask & Mask.RenderBG) != 0;
+	}
+
+	get isRenderBGLeft()
+	{
+		return (this.mask & Mask.RenderBGLeft) != 0;
+	}
+
+	get isRenderFG()
+	{
+		return (this.mask & Mask.RenderFG) != 0;
+	}
+
+	get isRenderFGLeft()
+	{
+		return (this.mask & Mask.RenderFGLeft) != 0;
+	}
+
+	get isSpriteSize()
+	{
+		return (this.ctrl & Control.SpriteSize) != 0;
+	}
+
+	get isVBlank()
+	{
+		return (this.status & Status.VBlank) != 0;
+	}
+
+	get isZeroHit()
+	{
+		return (this.status & Status.ZeroHit) != 0;
+	}
+
+	/** Returns the full last used address */
+	get lastAddr()
+	{
+		return this._lastAddr;
 	}
 
 	/** Loads a CHR bank into bus RAM
@@ -522,6 +634,16 @@ export class PPU2C02
 	set mask(value)
 	{
 		this._nes.setByte(8193, value);
+	}
+
+	/** Readies the next frame */
+	nextFrame()
+	{
+		// clear the buffer first
+		for (let b of this._buf)
+			b = 0;
+
+		this._frameDone = false;
 	}
 
 	/** Gets the OAM address register */
@@ -560,20 +682,18 @@ export class PPU2C02
 	/** Writes a byte to PPU RAM */
 	setByte(addr, data)
 	{
+		// pattern table
 		if (addr >= 0 && addr <= 8191)
-			// MSB + remaining bits
 			this._bus.setByte(((addr & 4095) >> 12) * 64 + (addr & 4095), data);
+
+		// palette RAM indices
 		else if (addr >= 16128 && addr <= 16383)
 		{
-			addr %= 32;
-			switch (addr)
-			{
-				case 20: addr = 4; break;
-				case 24: addr = 8; break;
-				case 28: addr = 12; break;
-				default: addr = 0;
-			}
-			this._bus.setByte(addr, data);
+			addr = (addr % 32) + 16128;
+
+			// mirror the write
+			for (; addr < 16384; addr += 32)
+				this._bus.setByte(i, data);
 		}
 	}
 
@@ -586,15 +706,18 @@ export class PPU2C02
 		{
 			case 0: this.ctrl = data & 255; break;
 			case 1: this.mask = data & 255; break;
-			case 6: // remember to write hi byte on latch, lo byte otherwise
+			case 6:
+				// remember to write hi byte on latch, lo byte otherwise
 				if (this._addrLatch)
 				{
-					this.addr = (this.addr & 255) | ((data & 255) << 8);
+					this.addr = (data & 255) << 8;
+					this._lastAddr = (this.addr & 255) | (this.addr << 8);
 					this._addrLatch = false;
 				}
 				else
 				{
-					this.addr = (this.addr & 65280) | (data & 255);
+					this.addr = data & 255;
+					this._lastAddr = (this.addr & 65280) | (data & 255);
 					this._addrLatch = true;
 				}
 			case 7:
@@ -636,6 +759,16 @@ export class NES
 		return this._bus;
 	}
 
+	/** Clocks the CPU and PPU accordingly */
+	clock()
+	{
+		this.cpu.clock();
+
+		// PPU runs 3 times slower than CPU
+		if (this._cycles++ % 3 == 0)
+			this.ppu.clock();
+	}
+
 	/** Returns a reference to the CPU */
 	get cpu()
 	{
@@ -675,6 +808,8 @@ export class NES
 		this.ppu.reset();
 		this.cpu.reset();
 		this.bus.reset();
+		this._rom = null;
+		this._cycles = 0;
 	}
 
 	/** Returns a reference to the ROM */
@@ -700,7 +835,7 @@ export class NES
 		if (addr >= 8192 && addr < 16384)
 		{
 			// mirror the write
-			addr = (addr & 8) + 8192;
+			addr = (addr % 8) + 8192;
 			for (; addr < 16384; addr += 8)
 				this.bus.setUint8(addr, data);
 			return;

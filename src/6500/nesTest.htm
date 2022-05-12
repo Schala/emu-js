@@ -11,6 +11,15 @@
 		let y = document.getElementById("y");
 		let s = document.getElementById("s");
 		let pc = document.getElementById("pc");
+		let ctrl = document.getElementById("ppuctrl");
+		let mask = document.getElementById("ppumask");
+		let status = document.getElementById("ppustatus");
+		let scroll = document.getElementById("ppuscroll");
+		let ppudata = document.getElementById("ppudata");
+		let ppuaddr = document.getElementById("ppuaddr");
+		let dma = document.getElementById("oamdma");
+		let oamaddr = document.getElementById("oamaddr");
+		let oamdata = document.getElementById("oamdata");
 		let abs = document.getElementById("abs");
 		let rel = document.getElementById("rel");
 		let p = document.getElementById("p");
@@ -45,20 +54,22 @@
 
 		execbtn.addEventListener("click", () =>
 		{
-			cpu.clock();
+			nes.clock();
 			while (cpu.cycles > 0)
 				cpu.clock();
-			a.innerHTML = "A: $" + cpu.accumulator.toString(16).toUpperCase().padStart(2, '0');
-			s.innerHTML = "S: $" + cpu.stackPtr.toString(16).toUpperCase().padStart(2, '0');
-			x.innerHTML = "X: $" + cpu.x.toString(16).toUpperCase().padStart(2, '0');
-			y.innerHTML = "Y: $" + cpu.y.toString(16).toUpperCase().padStart(2, '0');
+			a.innerHTML = "A: " + cpu.accumulator.toString(16).toUpperCase().padStart(2, '0');
+			s.innerHTML = "S: " + cpu.stackPtr.toString(16).toUpperCase().padStart(2, '0');
+			x.innerHTML = "X: " + cpu.x.toString(16).toUpperCase().padStart(2, '0');
+			y.innerHTML = "Y: " + cpu.y.toString(16).toUpperCase().padStart(2, '0');
 			op.innerHTML = "Last opcode: " + cpu.lastMnemonic.toUpperCase();
 			pc.innerHTML = "PC: $" + cpu.counter.toString(16).toUpperCase().padStart(4, '0');
-			abs.innerHTML = "Last absolute address: $" + cpu.lastAbsAddr.toString(16).toUpperCase().padStart(4, '0');
-			rel.innerHTML = "Last relative address: $" + cpu.lastRelAddr.toString(16).toUpperCase().padStart(2, '0');
+			abs.innerHTML = "Last absolute address: " + cpu.lastAbsAddr.toString(16).toUpperCase().padStart(4, '0');
+			rel.innerHTML = "Last relative address: " + cpu.lastRelAddr.toString(16).toUpperCase().padStart(2, '0');
 
 			p.innerHTML = (cpu.isCarry ? 'C' : 'x') + (cpu.isZero ? 'Z' : 'x') + (cpu.hasInterrupts ? 'I' : 'x') + (cpu.isDecimal ? 'D' : 'x') + 
 				(cpu.isBreak ? 'B' : 'x') + (cpu.isUndefined ? 'U' : 'x') + (cpu.isOverflow ? 'V' : 'x') + (cpu.isNegative ? 'N' : 'x');
+			
+			ppuaddr.innerHTML = "PPUADDR: " + 
 			
 			hex.innerHTML = emu.hexdump(bus.ram);
 		});
@@ -75,19 +86,34 @@
 				</td>
 			</tr>
 			<tr>
-				<td><label id="abs">Last absolute address: $0000</p></td>
-				<td><label id="rel">Last relative address: $00</p></td>
-				<td><label id="p">xxxxxxxx</p></td>
+				<td><label id="abs">Last absolute address: 0000</label></td>
+				<td><label id="rel">Last relative address: 00</label></td>
+				<td><label id="p">xxxxxxxx</label></td>
 			</tr>
 			<tr>
-				<td><label id="a">A: 0</p></td>
-				<td><label id="x">X: 0</p></td>
-				<td><label id="y">Y: 0</p></td>
+				<td><label id="a">A: 00</label></td>
+				<td><label id="x">X: 00</label></td>
+				<td><label id="y">Y: 00</label></td>
 			</tr>
 			<tr>
-				<td><label id="s">SP: 0</p></td>
+				<td><label id="s">SP: 00</label></td>
 				<td><label id="op">Last opcode: NOP</label></td>
-				<td><label id="pc">PC: $0000</p></td>
+				<td><label id="pc">PC: 0000</label></td>
+			</tr>
+			<tr>
+				<td><label id="ppuctrl">PPUCTRL: NNNNNNN</label></td>
+				<td><label id="status">PPUSTATUS: NNN</label></td>
+				<td><label id="mask">PPUMASK: NNNNNNNN</label></td>
+			</tr>
+			<tr>
+				<td><label id="ppuaddr">PPUADDR: 00</label></td>
+				<td><label id="ppudata">PPUDATA: 00</label></td>
+				<td><label id="ppuscroll">PPUSCROLL: 00</label></td>
+			</tr>
+			<tr>
+				<td><label id="oamaddr">OAMADDR: 00</label></td>
+				<td><label id="oamdata">OAMDATA: 00</label></td>
+				<td><label id="oamdma">OAMDMA: 00</label></td>
 			</tr>
 			<tr>
 				<td colspan="3">
