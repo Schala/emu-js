@@ -1,7 +1,7 @@
 "use strict"
 
-import * as emulator from "../emulator";
-import * as mos6500 from "6500";
+import * as emulator from "../emulator.mjs";
+import * as mos6500 from "./6500.mjs";
 
 /** GameGenie character map */
 const Char =
