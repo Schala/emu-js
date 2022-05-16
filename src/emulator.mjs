@@ -35,6 +35,12 @@ export function hexdump(data, offset = 0)
 	return output;
 }
 
+/** Returns a 'Y' or 'N' string representation of a boolean value */
+export function yn(b)
+{
+	return b ? 'Y' : 'N';
+}
+
 /** The bus is the main hub for all connected devices. */
 export class Bus
 {

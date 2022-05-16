@@ -2,7 +2,9 @@
 <html>
 	<title>NES test</title>
 	<script type="module">
-		import * as nes from "./nes.mjs";
+		import * as emu from "../emulator.mjs";
+		import * as mos6500 from "./6500.mjs";
+		import * as nintendo from "./nes.mjs";
 
 		let execbtn = document.getElementById("execbtn");
 
@@ -27,7 +29,7 @@
 		let hex = document.getElementById("ramhex");
 		let refbtn = document.getElementById("refbtn");
 
-		let nintendo = new nes.NES();
+		let nes = new nintendo.NES();
 
 		let lastInput = null;
 
@@ -36,8 +38,9 @@
 			input.files[0].arrayBuffer().then((buf) =>
 			{
 				lastInput = buf;
+				nes.loadRom(buf);
 
-				hex.innerHTML = emu.hexdump(nintendo.bus.ram);
+				hex.innerHTML = emu.hexdump(nes.bus.ram);
 			});
 		}
 
@@ -46,30 +49,43 @@
 			if (lastInput === (null || undefined))
 				return;
 			
-			let offset = parseInt(offs.value);
-			bus.load(lastInput, offset);
+			lastInput = buf;
+			nes.loadRom(buf);
 
-			hex.innerHTML = emu.hexdump(bus.ram);
+			hex.innerHTML = emu.hexdump(nes.bus.ram);
 		});
 
 		execbtn.addEventListener("click", () =>
 		{
 			nes.clock();
-			while (cpu.cycles > 0)
-				cpu.clock();
-			a.innerHTML = "A: " + cpu.accumulator.toString(16).toUpperCase().padStart(2, '0');
-			s.innerHTML = "S: " + cpu.stackPtr.toString(16).toUpperCase().padStart(2, '0');
-			x.innerHTML = "X: " + cpu.x.toString(16).toUpperCase().padStart(2, '0');
-			y.innerHTML = "Y: " + cpu.y.toString(16).toUpperCase().padStart(2, '0');
-			op.innerHTML = "Last opcode: " + cpu.lastMnemonic.toUpperCase();
-			pc.innerHTML = "PC: $" + cpu.counter.toString(16).toUpperCase().padStart(4, '0');
-			abs.innerHTML = "Last absolute address: " + cpu.lastAbsAddr.toString(16).toUpperCase().padStart(4, '0');
-			rel.innerHTML = "Last relative address: " + cpu.lastRelAddr.toString(16).toUpperCase().padStart(2, '0');
+			while (nes.cpu.cycles > 0)
+				nes.clock();
+			a.innerHTML = "A: " + nes.cpu.accumulator.toString(16).toUpperCase().padStart(2, '0');
+			s.innerHTML = "SP: " + nes.cpu.stackPtr.toString(16).toUpperCase().padStart(2, '0');
+			x.innerHTML = "X: " + nes.cpu.x.toString(16).toUpperCase().padStart(2, '0');
+			y.innerHTML = "Y: " + nes.cpu.y.toString(16).toUpperCase().padStart(2, '0');
+			op.innerHTML = "Last opcode: " + nes.cpu.lastMnemonic.toUpperCase();
+			pc.innerHTML = "PC: " + nes.cpu.counter.toString(16).toUpperCase().padStart(4, '0');
+			abs.innerHTML = "Last absolute address: " + nes.cpu.lastAbsAddr.toString(16).toUpperCase().padStart(4, '0');
+			rel.innerHTML = "Last relative address: " + nes.cpu.lastRelAddr.toString(16).toUpperCase().padStart(2, '0');
 
-			p.innerHTML = (cpu.isCarry ? 'C' : 'x') + (cpu.isZero ? 'Z' : 'x') + (cpu.hasInterrupts ? 'I' : 'x') + (cpu.isDecimal ? 'D' : 'x') + 
-				(cpu.isBreak ? 'B' : 'x') + (cpu.isUndefined ? 'U' : 'x') + (cpu.isOverflow ? 'V' : 'x') + (cpu.isNegative ? 'N' : 'x');
+			p.innerHTML = (nes.cpu.isCarry ? 'C' : 'x') + (nes.cpu.isZero ? 'Z' : 'x') + (nes.cpu.hasInterrupts ? 'I' : 'x') + (nes.cpu.isDecimal ? 'D' : 'x') + 
+				(nes.cpu.isBreak ? 'B' : 'x') + (nes.cpu.isUndefined ? 'U' : 'x') + (nes.cpu.isOverflow ? 'V' : 'x') + (nes.cpu.isNegative ? 'N' : 'x');
 			
-			ppuaddr.innerHTML = "PPUADDR: " + 
+			ppuaddr.innerHTML = "PPUADDR: " + nes.ppu.addr.toString(16).toUpperCase().padStart(2, '0');
+			ppudata.innerHTML = "PPUDATA: " + nes.ppu.data.toString(16).toUpperCase().padStart(2, '0');
+			scroll.innerHTML = "PPUSCROLL: " + nes.ppu.scroll.toString(16).toUpperCase().padStart(2, '0');
+
+			oamaddr.innerHTML = "OAMADDR: " + nes.ppu.oamAddr.toString(16).toUpperCase().padStart(2, '0');
+			oamdata.innerHTML = "OAMDATA: " + nes.ppu.oamData.toString(16).toUpperCase().padStart(2, '0');
+			dma.innerHTML = "OAMDMA: " + nes.ppu.dma.toString(16).toUpperCase().padStart(2, '0');
+
+			ctrl.innerHTML = "PPUCTRL: " + emu.yn(nes.ppu.isNameTableX) + emu.yn(nes.ppu.isNameTableY) + emu.yn(nes.ppu.isIncrement) +
+				emu.yn(nes.ppu.isPatternFG) + emu.yn(nes.ppu.isPatternBG) + emu.yn(nes.ppu.isSpriteSize) + emu.yn(nes.ppu.isNMI);
+			mask.innerHTML = "PPUMASK: " + emu.yn(nes.ppu.isGrayscale) + emu.yn(nes.ppu.isRenderBGLeft) + emu.yn(nes.ppu.isRenderFGLeft) +
+				emu.yn(nes.ppu.isRenderBG) + emu.yn(nes.ppu.isRenderFG) + emu.yn(nes.ppu.hasEnhancedRed) +
+				emu.yn(nes.ppu.hasEnhancedGreen) + emu.yn(nes.ppu.hasEnhancedBlue);
+			status.innerHTML = "PPUSTATUS: " + emu.yn(nes.ppu.isOverflow) + emu.yn(nes.ppu.isZeroHit) + emu.yn(nes.ppu.isVBlank);
 			
 			hex.innerHTML = emu.hexdump(bus.ram);
 		});
@@ -82,7 +98,7 @@
 				</td>
 				<td>
 					<button type="button" id="execbtn">Clock</button>
-					<button type="button" id="refbtn">Refresh</button>
+					<button type="button" id="refbtn">Reset</button>
 				</td>
 			</tr>
 			<tr>
@@ -117,7 +133,7 @@
 			</tr>
 			<tr>
 				<td colspan="3">
-					<textarea id="ramhex" wrap="physical" cols="120" rows="16" readonly/></textarea>
+					<textarea id="ramhex" wrap="physical" cols="80" rows="16" readonly/></textarea>
 				</td>
 			</tr>
 		</table>
